@@ -33,24 +33,41 @@ class LinearRegressionModel(nn.Module):
                                         nn.Linear(3,3),
                                         nn.ReLU(),
                                         nn.Linear(3, 1),
-                                        nn.ReLU(),
-
                                         )
 
     def forward(self, x):
-        logits = self.linearReluStack(x)
-        return logits
+      logits = self.linearReluStack(x)
+      return logits
 
-    def decrireFacette(self, x, layer_index):
+    def decrireFacette0(self, x, layer_index):
       current_input = x
       for i, layer in enumerate(self.linearReluStack):
         current_input = layer(current_input)
         if i == layer_index:
           activation = current_input.clone().detach().numpy()
+          activation_binaires = (current_input > 0).int().detach().numpy()
           print(f"\nActivations for Layer {i} : {activation}")
           print(f"Active neurons: {(activation > 0).astype(int)}")
           return activation
       return None
+
+#retourne l'activation d'une seule couche du réseau
+    def decrireFacette(self, x, layer_index):
+      current_input = x
+      for i, layer in enumerate(self.linearReluStack):
+        current_input = layer(current_input)
+        if i == layer_index:
+          activation_binaires = (current_input > 0).int().detach().numpy()
+          return activation_binaires
+      return None
+
+#retourne une liste de vecteurs des activations de toutes les couches
+    def activations(self, x):
+      activation = [x.detach().numpy()]
+      for layer_index in range(0, len(self.linearReluStack), 2):
+        activation_couche = self.decrireFacette(x, layer_index)
+        activation.append(activation_couche)
+      return activation
 
 
 model = LinearRegressionModel()
@@ -95,7 +112,8 @@ predicted = model(X_tensor).detach().numpy()
 plt.plot(X, predicted)
 plt.show()
 
-#test de decrireFacette
+#test de decrireFacette et activations
 x_test = torch.tensor([[0.192]], dtype=torch.float32)
 layer_index = 2
-model.decrireFacette(x_test, layer_index)
+print("Activation de la couche ", layer_index, model.decrireFacette(x_test, layer_index))
+print("Activations du réseau ", model.activations(x_test))
