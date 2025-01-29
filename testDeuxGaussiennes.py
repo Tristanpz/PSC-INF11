@@ -30,7 +30,7 @@ model = reseauPytorch.creerReseau([1,2,1])
 reseauPytorch.entrainerReseau(model, X_tensor, y_tensor, num_epochs)
 
 #generation de donnees gaussiennes
-n = 20
+n = 5
 X = np.zeros((n))
 y = np.zeros((n))
 
@@ -50,3 +50,11 @@ X_tensor = torch.tensor(np.transpose(np.atleast_2d(X)), dtype=torch.float32)
 predicted = model(X_tensor).detach().numpy()
 plt.plot(X, predicted)
 plt.show()
+
+#test de reseauLin
+x_test = torch.tensor([[0.192]], dtype=torch.float32)
+print(model.activations(x_test))
+W, B = model.reseauLin(model.activations(x_test))
+x = x_test.detach().numpy()
+print("resultat aplati :", np.matmul(W, x) +B)
+print("resultat reseau :", model(x_test).detach())
