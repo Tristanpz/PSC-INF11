@@ -38,18 +38,26 @@ for i in range(n) :
     res, donnee = genDonneesGaussiennes()
     X[i] = donnee
     y[i] = res
-
+# test de l'entraînement du reseau 
 X_tensor = torch.tensor(np.transpose(np.atleast_2d(X)), dtype=torch.float32)
 y_tensor = torch.tensor(np.transpose(np.atleast_2d(y)), dtype=torch.float32)
 predicted = model(X_tensor).detach().numpy()
 for i in range(n) :
     print(X_tensor[i], y_tensor[i], predicted[i])
 
+#predictions sur l'intervalle [-4,4]
 X = np.linspace(-4, 4, 1000)
 X_tensor = torch.tensor(np.transpose(np.atleast_2d(X)), dtype=torch.float32)
 predicted = model(X_tensor).detach().numpy()
 plt.plot(X, predicted)
 plt.show()
+
+#test de decrireFacette et activations
+x_test = torch.tensor([[0.192]], dtype=torch.float32)
+layer_index = 2
+print("Activation de la couche ", layer_index, model.decrireFacette(x_test, layer_index))
+print("Activations du réseau ", model.activations(x_test))
+
 
 #test de reseauLin
 x_test = torch.tensor([[0.192]], dtype=torch.float32)
