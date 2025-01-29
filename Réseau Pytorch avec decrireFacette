@@ -62,11 +62,21 @@ class LinearRegressionModel(nn.Module):
       return None
 
 #retourne une liste de vecteurs des activations de toutes les couches
-    def activations(self, x):
+#on travaille avec des ReLU dans le réseau 
+#fonction qui utilise decrireFacette
+    def activations0(self, x):
       activation = [x.detach().numpy()]
       for layer_index in range(0, len(self.linearReluStack), 2):
         activation_couche = self.decrireFacette(x, layer_index)
         activation.append(activation_couche)
+      return activation
+
+#fonction sans utiliser decrireFacette
+    def activations(self, x):
+      activation = [x.detach().numpy()]
+      for i in range(0, len(self.linearReluStack), 2):
+        x = self.linearReluStack[i](x)
+        activation.append((x > 0).int().detach().numpy())
       return activation
 
 
