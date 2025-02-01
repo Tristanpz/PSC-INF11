@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch.optim as optim
 import numpy as np
+import matplotlib.pyplot as plt
 
 class LinearRegressionModel(nn.Module):
     def __init__(self, archi):
@@ -54,7 +55,6 @@ class LinearRegressionModel(nn.Module):
         etatActivation.append(np.array([1]*self.tailleOut))
         W = np.eye(self.tailleIn)
         B = np.array([0]*self.tailleIn)
-        print(np.shape(B))
         for i in range(0, len(self.linearReluStack), 2) :
             layer = self.linearReluStack[i]
             activLayer = np.diagflat(etatActivation[i//2])
@@ -67,12 +67,26 @@ class LinearRegressionModel(nn.Module):
 def creerReseau(archi) :   
     return LinearRegressionModel(archi)
 
-def entrainerReseau(model, X_tensor, y_tensor, num_epochs= 100) :
+def entrainerReseau(model, X_tensor, y_tensor, num_epochs= 100, nbBatch = 1) :
     criterion = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=0.01)
+    nbDonnees = len(X_tensor)
+    donneesParBatch = nbDonnees // nbBatch
+    
+    listePerte = np.zeros(num_epochs*nbBatch)
     for epoch in range(num_epochs):
-        outputs = model(X_tensor)
-        loss = criterion(outputs, y_tensor)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        for i in range(nbBatch) :
+            if i == nbBatch-1 :  
+                outputs = model(X_tensor[i*donneesParBatch:, :])
+                loss = criterion(outputs, y_tensor[i*donneesParBatch:, :])
+            else : 
+                outputs = model(X_tensor[i*donneesParBatch : (i+1)*donneesParBatch, :])
+                loss = criterion(outputs, y_tensor[i*donneesParBatch : (i+1)*donneesParBatch, :])
+            listePerte[epoch] = loss.detach().numpy().mean()
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+        
+    plt.plot(range(num_epochs*nbBatch), np.array(listePerte))
+    plt.title("Evolution de la perte au cours de l'entrainement")
+    plt.show()
