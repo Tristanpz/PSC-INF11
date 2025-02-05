@@ -34,7 +34,7 @@ y_tensor = torch.tensor(y, dtype=torch.float32)
 model = reseauPytorch.creerReseau([3, 3, 2, 2])
 
 num_epochs = 3000
-nbBatch = 1
+nbBatch = 5
 reseauPytorch.entrainerReseau(model, X_tensor, y_tensor, num_epochs, nbBatch)
 
 torch.save(model, "model_sphere.pth") 
