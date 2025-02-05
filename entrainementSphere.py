@@ -37,5 +37,5 @@ num_epochs = 1000
 nbBatch = 1
 reseauPytorch.entrainerReseau(model, X_tensor, y_tensor, num_epochs, nbBatch)
 
-
+torch.save(model, "model_complete.pth") 
     
