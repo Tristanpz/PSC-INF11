@@ -11,7 +11,7 @@ import scipy.stats as sps
 import matplotlib.pyplot as plt
 
 
-model = torch.load("model_complete.pth", weights_only = False)
+model = torch.load("modelDeuxGaussiennes.pth", weights_only = False)
 model.eval()
 
 # #generation de donnees gaussiennes
@@ -53,7 +53,6 @@ model.eval()
 # print("resultat aplati :", np.matmul(W, x) +B)
 # print("resultat reseau :", model(x_test).detach())
 
-#test de distance
-
-x_test = torch.tensor([[0.192]], dtype=torch.float32)
-print("distance :", model.distance(x_test))
+# #test de distance
+# x_test = torch.tensor([0.192], dtype=torch.float32)
+# print("distance :", model.distance(x_test))
