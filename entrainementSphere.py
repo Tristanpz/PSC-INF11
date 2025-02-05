@@ -28,8 +28,8 @@ for i in range(N):
     X[i] = donnee
     y[i] = res
 
-X_tensor = torch.tensor(np.transpose(X), dtype=torch.float32)
-y_tensor = torch.tensor(np.transpose(y), dtype=torch.float32)
+X_tensor = torch.tensor(X, dtype=torch.float32)
+y_tensor = torch.tensor(y, dtype=torch.float32)
 
 model = reseauPytorch.creerReseau([3, 3, 2])
 
