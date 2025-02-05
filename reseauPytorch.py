@@ -78,8 +78,8 @@ class LinearRegressionModel(nn.Module):
             maximum = 0
             for j in range(np.shape(W)[0]) :
                 normeLigne = np.linalg.norm(W[j,:],ord = 1)
-                if np.abs(x_mod[0,j])/normeLigne < minimum : 
-                    minimum = np.abs(x_mod[0,j])/normeLigne
+                if np.abs(x_mod[j])/normeLigne < minimum : 
+                    minimum = np.abs(x_mod[j])/normeLigne
                 if normeLigne > maximum :
                     maximum = normeLigne
             distTemp = minimum / produitMaxi
