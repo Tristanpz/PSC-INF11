@@ -6,20 +6,21 @@ import matplotlib.pyplot as plt
 import reseauPytorch
 
 def genDonneesGaussiennes() :
-  m, s = (-2, 2), (1, 1)
-  al = np.random.randint(0,2)
-  return al, sps.norm.rvs(m[al], s[al])
+  m, s = ([-2,-2], [2,2],[0,0]),(np.eyes(2))
+  al = np.random.randint(0,3)
+  return al, np.random.multivariate_normal(m[al], s[0])
 
 
 N = 100
 
 X = np.zeros((N))
 y = np.zeros((N))
+    
 
 for i in range(N) :
     res, donnee = genDonneesGaussiennes()
     X[i] = donnee
-    y[i] = res
+    y[i] = 
 
 X_tensor = torch.tensor(np.transpose(np.atleast_2d(X)), dtype=torch.float32)
 y_tensor = torch.tensor(np.transpose(np.atleast_2d(y)), dtype=torch.float32)
