@@ -62,8 +62,35 @@ class LinearRegressionModel(nn.Module):
             W = np.matmul(poidsCorr, W)
             B = np.matmul(poidsCorr, B) + np.matmul(activLayer,layer.bias.data.numpy())
         return W, B
-
-
+    
+    def distance(self, x) :
+        d = np.inf
+        produitMaxi = 1
+        
+        for i in range(0, len(self.linearReluStack)-1, 2):
+            if not i :
+                x = nn.ReLU()(x)
+            layer = self.linearReluStack[i]
+            x = layer(x)
+            x_mod = x.detach().numpy()
+            W = layer.weight.data.numpy()
+            minimum = np.inf
+            maximum = 0
+            print(x_mod)
+            for j in range(np.shape(W)[0]) :
+                normeLigne = np.linalg.norm(W[j,:],ord = 1)
+                print(i,j,normeLigne)
+                if np.abs(x_mod[0,j])/normeLigne < minimum : 
+                    minimum = np.abs(x_mod[0,j])/normeLigne
+                if normeLigne > maximum :
+                    maximum = normeLigne
+            distTemp = minimum / produitMaxi
+            print(distTemp)
+            if  distTemp < d : 
+                d = distTemp
+            produitMaxi *= maximum
+        return d 
+        
 def creerReseau(archi) :   
     return LinearRegressionModel(archi)
 
