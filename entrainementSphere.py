@@ -31,9 +31,9 @@ for i in range(N):
 X_tensor = torch.tensor(X, dtype=torch.float32)
 y_tensor = torch.tensor(y, dtype=torch.float32)
 
-model = reseauPytorch.creerReseau([3, 3, 2])
+model = reseauPytorch.creerReseau([3, 3, 2, 2])
 
-num_epochs = 1000
+num_epochs = 3000
 nbBatch = 1
 reseauPytorch.entrainerReseau(model, X_tensor, y_tensor, num_epochs, nbBatch)
 
