@@ -76,16 +76,13 @@ class LinearRegressionModel(nn.Module):
             W = layer.weight.data.numpy()
             minimum = np.inf
             maximum = 0
-            print(x_mod)
             for j in range(np.shape(W)[0]) :
                 normeLigne = np.linalg.norm(W[j,:],ord = 1)
-                print(i,j,normeLigne)
                 if np.abs(x_mod[0,j])/normeLigne < minimum : 
                     minimum = np.abs(x_mod[0,j])/normeLigne
                 if normeLigne > maximum :
                     maximum = normeLigne
             distTemp = minimum / produitMaxi
-            print(distTemp)
             if  distTemp < d : 
                 d = distTemp
             produitMaxi *= maximum
