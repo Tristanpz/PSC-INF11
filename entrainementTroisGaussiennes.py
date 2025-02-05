@@ -13,9 +13,9 @@ import matplotlib.pyplot as plt
 import reseauPytorch
 
 def genDonneesGaussiennes() :
-  m, s = ([-2,-2], [2,2],[0,0]),(np.eye(2,2))
+  m, s = ([-2,-2], [2,2],[0,0]),np.eye(2)
   al = np.random.randint(0,3)
-  return al, np.random.multivariate_normal(m[al], s[0])
+  return al, np.random.multivariate_normal(m[al], s)
 
 
 N = 100
