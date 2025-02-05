@@ -44,3 +44,5 @@ nbBatch = 2
 
 model = reseauPytorch.creerReseau([1,3,2,3])
 reseauPytorch.entrainerReseau(model, X_tensor, y_tensor, num_epochs, nbBatch)
+
+torch.save(model, "model_complete.pth") 
