@@ -11,11 +11,11 @@ import numpy as np
 import reseauPytorch
 
 def genDonneesGaussiennes() :
-  m, s = ([-2,-2], [2,2],[0,0]),np.eye(2)
+  m, s = (np.array([-2,-2]), np.array([2,2]),np.array([0,0])),np.eye(2)
   al = np.random.randint(0,3)
   return al, np.random.multivariate_normal(m[al], s)
 
-N = 100
+N = 50
 
 X = np.zeros((N,2))
 y = np.zeros((N,3))
@@ -30,18 +30,16 @@ def format_res(i):
     
 for i in range(N) :
     res, donnee = genDonneesGaussiennes()
-    X[i,0] = donnee[0]
-    X[i,0] = donnee[1]
-    for j in range(3) : 
-        y[i,j] = format_res(res)[j]
+    X[i] = donnee
+    y[i] = format_res(res)
 
 X_tensor = torch.tensor(X, dtype=torch.float32)
 y_tensor = torch.tensor(y, dtype=torch.float32)
 
-num_epochs = 1000
-nbBatch = 2
+num_epochs = 100
+nbBatch = 20
 
-model = reseauPytorch.creerReseau([2,3,2,3])
+model = reseauPytorch.creerReseau([2,4,4,3])
 reseauPytorch.entrainerReseau(model, X_tensor, y_tensor, num_epochs, nbBatch)
 
 
