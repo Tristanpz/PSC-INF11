@@ -41,9 +41,9 @@ def predire(predictions):
 
 p = predire(predictions)
 
-print("Prédictions du modèle:\n", predictions)
-print("\nValeurs réelles:\n", y_test)
-print("\nRésultat:\n", p)
+for i in range(len(predictions)):
+    print(f"Prédiction: {predictions[i]}, Valeur réelle: {y_test[i]}, Résultat: {sortie[i]}")
+
 
 
 
