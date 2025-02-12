@@ -9,8 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import collections as col
 import torch
-# import os
-# os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
+import os
+os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
 
 
 
@@ -19,7 +19,7 @@ model.eval()
 
 ##Test distances
 
-N=1000
+N=10000
 ##Création de N points de l'espace d'entrée
 liste_entrees=[torch.tensor([(np.random.rand()-0.5)*8,(np.random.rand()-0.5)*8],dtype=torch.float32) for _ in range(N)]
 
@@ -33,7 +33,13 @@ liste_act=[model.activations_bin(x) for x in liste_entrees]
 dic_facettes=col.Counter(liste_act)
 
 
-def enumeration_facettes():
+def enumeration_facettes(): 
+    x=range(len(dic_facettes.keys()))
+    h=[dic_facettes[act]for act in dic_facettes.keys()]
+    plt.bar(x,h,label=["e" for _ in x])
+##problème pour l'affichage des labels
+    plt.title("Répartition des points sur les facettes")
+    plt.show()
     return len(dic_facettes.keys()),dic_facettes
 
 def partition_facettes():##renvoie un dico (clés=état d'activation (en binaire), valeur=liste des indices des entrées dans la facette)
@@ -56,7 +62,12 @@ def mesures_facettes():##renvoie un dico (clés=état d'activation (en binaire),
         mesures[act]=np.array([liste_distances[j] for j in partition[act]])
     return mesures
 
-    
+def moyenne():
+    mesures=mesures_facettes()
+    for act in mesures.keys():
+        print(act,"moyenne: ",np.mean(mesures[act]),"max: ",np.max(mesures[act]),"nombres de points: ",len(mesures[act]),"écart-type: ",np.std(mesures[act]))
+
+#moyenne()
 #Test du reseau 
 
 def genDonneesGaussiennes() :
@@ -77,7 +88,19 @@ def predire(res) :
     listeNorme = [np.linalg.norm(listeRes[i,:]-res, ord = 1) for i in range(3)]
     i = np.argmin(listeNorme)
     return listeRes[i]
-   
+
+def accuracy() :
+    N = 1000
+    NbVrai = 0 
+    for _ in range(N) : 
+        res,donnee = genDonneesGaussiennes()
+        res = format_res(res)
+        X_tensor = torch.tensor(donnee, dtype = torch.float32)
+        prediction = predire(model(X_tensor).detach().numpy())
+        if res[0] == prediction[0] and res[1] == prediction[1]:
+            NbVrai += 1
+    return NbVrai/N*100
+
 # N_test = 10
 # X_test = np.zeros((N_test, 2))
 # y_test = np.zeros((N_test, 3))
@@ -104,12 +127,13 @@ def couleur(res) :
     if np.array_equal(res, [0,0,1]) :
         return 'b'
     print("bruh")
-    
-X = np.linspace(-4,4,20)
-Y = np.linspace(-4, 4,20)
-for x in X :
-    for y in Y:
-        plt.scatter(x, y, c = couleur(predire(model(torch.tensor([x,y],dtype = torch.float32)).detach().numpy())), linewidths=0.2)
-        
-plt.show()
+
+def affichage_prediction():   
+    X = np.linspace(-4,4,20)
+    Y = np.linspace(-4, 4,20)
+    for x in X :
+        for y in Y:
+            plt.scatter(x, y, c = couleur(predire(model(torch.tensor([x,y],dtype = torch.float32)).detach().numpy())), linewidths=0.2)
+    plt.title("Prédiction du réseau sur R2")
+    plt.show()
                 
