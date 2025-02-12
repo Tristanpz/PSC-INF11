@@ -9,45 +9,54 @@ import numpy as np
 import matplotlib.pyplot as plt
 import collections as col
 import torch
+# import os
+# os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
 
 
 
-
-model = torch.load("model_3g.pth", weights_only = False)
+model = torch.load("model_3g1.pth", weights_only = False)
 model.eval()
 
 ##Test distances
 
-N= 1000
+N=1000
+##Création de N points de l'espace d'entrée
 liste_entrees=[torch.tensor([(np.random.rand()-0.5)*8,(np.random.rand()-0.5)*8],dtype=torch.float32) for _ in range(N)]
 
+##Calcul des distances pour chaque point
 liste_distances=[model.distance(x) for x in liste_entrees]
 
-def conversion_act_to_binaire(activation):
-    res=0
-    mult=0
-    for couche in activation:
-        for neurone in couche:
-            if neurone==1:
-                res+=2**mult
-            mult+=1
-    return res
+##Activation de chacun des points
+liste_act=[model.activations_bin(x) for x in liste_entrees]
 
-liste_act=[conversion_act_to_binaire(model.activations(x)) for x in liste_entrees]
+##Dictionnaire: clés=état d'activation (en binaire), valeurs= nombre de points dans la facette
 dic_facettes=col.Counter(liste_act)
+
 
 def enumeration_facettes():
     return len(dic_facettes.keys()),dic_facettes
 
-def d():
-    for act in dic_facettes: #je choisis une facette
-        for i in range(len(liste_distances)):
-            if liste_act[i]==act: #pour chaque point dans la facette
-                pass
-# print(liste_act)               
-# print(enumeration_facettes())
+def partition_facettes():##renvoie un dico (clés=état d'activation (en binaire), valeur=liste des indices des entrées dans la facette)
+    partition={}
+    for act in dic_facettes.keys(): #je choisis une facette
+        partition[act]=[]
+    for i in range(len(liste_distances)):
+       partition[liste_act[i]].append(i)
+    return partition
+      
+def mesures_facettes():##renvoie un dico (clés=état d'activation (en binaire), valeur=liste des distances des entrées dans la facette)
+    partition=partition_facettes()
+    mesures={}
+    for act in partition.keys():
+        # moyenne=0
+        # for i in partition[act]:
+        #     moyenne+=liste_distances[i]
+        # moyenne=moyenne/len(partition[act])
+        # mesures[act]=np.append(mesures[act],moyenne)
+        mesures[act]=np.array([liste_distances[j] for j in partition[act]])
+    return mesures
 
-
+    
 #Test du reseau 
 
 def genDonneesGaussiennes() :
@@ -96,8 +105,8 @@ def couleur(res) :
         return 'b'
     print("bruh")
     
-X = np.linspace(-4,4,50)
-Y = np.linspace(-4, 4,50)
+X = np.linspace(-4,4,20)
+Y = np.linspace(-4, 4,20)
 for x in X :
     for y in Y:
         plt.scatter(x, y, c = couleur(predire(model(torch.tensor([x,y],dtype = torch.float32)).detach().numpy())), linewidths=0.2)
