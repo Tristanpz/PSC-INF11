@@ -47,7 +47,7 @@ class LinearRegressionModel(nn.Module):
             activation.append((x > 0).int().detach().numpy())
         return activation 
     
-    def act_to_binaire(activation):
+    def act_to_binaire(self, activation):
         res=0
         mult=0
         for couche in activation:
