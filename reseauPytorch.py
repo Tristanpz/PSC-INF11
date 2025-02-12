@@ -46,6 +46,19 @@ class LinearRegressionModel(nn.Module):
             x = self.linearReluStack[i](x)
             activation.append((x > 0).int().detach().numpy())
         return activation 
+    
+    def act_to_binaire(activation):
+        res=0
+        mult=0
+        for couche in activation:
+            for neurone in couche:
+                if neurone==1:
+                    res+=2**mult
+                mult+=1
+        return res
+    
+    def activations_bin(self,x):
+        return self.act_to_binaire(self.activations(x))
 
     def reseauLin(self, etatActivation) :
         ''' prend en entree une liste de vecteurs qui decrit l'etat d'activation du reseau
