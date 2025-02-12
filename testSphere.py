@@ -7,8 +7,8 @@ model = torch.load("model_sphere.pth")
 model.eval() 
 
 def genDonneesSpheriques():
-    r = 8
-    point = np.random.uniform(0, 10, 3) 
+    r = 10
+    point = np.random.uniform(-10, 10, 3) 
     distance_carre = np.sum(point**2)
 
     if distance_carre < r**2:
@@ -30,11 +30,20 @@ X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
 
 predictions = model(X_test_tensor).detach().numpy()
 
-print("Prédictions du modèle:")
-print(predictions)
+def predire(predictions):
+    resultat = []
+    for pred in predictions:
+        if pred[0] > pred[1]:  
+            resultat.append("Dans la sphère")
+        else:
+            resultat.append("En dehors de la sphère")
+    return resultat
 
-print("Valeurs réelles:")
-print(y_test)
+p = predire(predictions)
+
+print("Prédictions du modèle:\n", predictions)
+print("\nValeurs réelles:\n", y_test)
+print("\nRésultat:\n", p)
 
 
 
