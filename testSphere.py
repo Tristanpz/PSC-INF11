@@ -44,6 +44,17 @@ p = predire(predictions)
 for i in range(len(predictions)):
     print(f"Valeur réelle: {y_test[i]}, Prédiction: {predictions[i]}, Résultat: {sortie[i]}")
 
+def accuracy(predictions, y_test):
+    correct = 0
+    for i in range(len(predictions)):
+        pred = 1 if predictions[i][0] > predictions[i][1] else 0
+        reel = 1 if y_test[i][0] > y_test[i][1] else 0
+        if pred == reel:
+            correct += 1
+    return correct / len(predictions) * 100  
+
+
+print (accuracy(predictions, y_test), "%")
 
 
 
