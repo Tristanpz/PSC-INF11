@@ -7,10 +7,10 @@ import reseauPytorch
 
 def genDonneesSpheriques() :
     #le rayon de la sphere
-    r = 5
+    r = 10
 
     #coordonnees d'un point
-    point = np.random.uniform(0, 10,3)
+    point = np.random.uniform(-10, 10,3)
 
     distance_carre = np.sum(point**2)
 
@@ -31,7 +31,7 @@ for i in range(N):
 X_tensor = torch.tensor(X, dtype=torch.float32)
 y_tensor = torch.tensor(y, dtype=torch.float32)
 
-model = reseauPytorch.creerReseau([3, 3, 2, 2])
+model = reseauPytorch.creerReseau([3, 15, 15, 2])
 
 num_epochs = 3000
 nbBatch = 5
