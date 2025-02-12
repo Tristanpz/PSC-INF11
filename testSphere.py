@@ -53,8 +53,7 @@ def accuracy(predictions, y_test):
             correct += 1
     return correct / len(predictions) * 100  
 
-
-print (accuracy(predictions, y_test), "%")
+print ("Accuracy: ",accuracy(predictions, y_test), "%")
 
 
 
