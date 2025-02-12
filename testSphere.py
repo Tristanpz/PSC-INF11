@@ -42,7 +42,8 @@ def predire(predictions):
 p = predire(predictions)
 
 for i in range(len(predictions)):
-    print(f"Prédiction: {predictions[i]}, Valeur réelle: {y_test[i]}, Résultat: {sortie[i]}")
+    print(f"Valeur réelle: {y_test[i]}, Prédiction: {predictions[i]}, Résultat: {sortie[i]}")
+
 
 
 
