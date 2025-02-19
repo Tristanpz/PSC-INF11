@@ -13,10 +13,7 @@ import torch
 import os
 os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
 
-list_colors=[]
-dico_colors=mcolors.CSS4_COLORS
-for key in dico_colors:
-    list_colors.append(dico_colors[key])
+
 
 model = torch.load("model_3g1.pth", weights_only = False)
 model.eval()
@@ -24,8 +21,16 @@ model.eval()
 ##Test distances
 
 N=10000
-##Création de N points de l'espace d'entrée
-liste_entrees=[torch.tensor([(np.random.rand()-0.5)*8,(np.random.rand()-0.5)*8],dtype=torch.float32) for _ in range(N)]
+##Création de N points randoms de l'espace d'entrée
+#liste_entrees=[torch.tensor([(np.random.rand()-0.5)*8,(np.random.rand()-0.5)*8],dtype=torch.float32) for _ in range(N)]
+
+##Création de N points bien répartis de l'espace d'entrée
+
+x=np.linspace(-4,4,int(np.sqrt(N)))
+y=np.linspace(-4,4,int(np.sqrt(N)))
+X, Y =np.meshgrid(x,y, indexing='ij')
+points=np.column_stack((X.ravel(),Y.ravel()))
+liste_entrees=torch.tensor(points, dtype=torch.float32)
 
 ##Calcul des distances pour chaque point
 liste_distances=[model.distance(x) for x in liste_entrees]
@@ -161,13 +166,21 @@ def affichage_prediction():
     plt.title("Prédiction du réseau sur R2")
     plt.show()
 
-def visualisation_facettes():
-    #◘cmap=plt.get_cmap('viridis')
+list_colors=[]
+dico_colors=mcolors.CSS4_COLORS
+for key in dico_colors:
+    list_colors.append(dico_colors[key])
+    
+def visualisation_facettes_simple():#crée des points (on peut mettre moins de N points)
     X = np.linspace(-4,4,50)
     Y = np.linspace(-4, 4,50)
     for x in X:
-        for y in Y:
-            #print(model.activations_bin(torch.tensor([x,y],dtype = torch.float32))%148)
-            plt.scatter(x,y,c=list_colors[model.activations_bin(torch.tensor([x,y],dtype = torch.float32))%148])
-            #plt.scatter(x,y,c=cmap(model.activations_bin(torch.tensor([x,y],dtype = torch.float32))/256))
+        for y in Y:    
+            plt.scatter(x,y,c=list_colors[model.activations_bin(torch.tensor([x,y],dtype = torch.float32))%148],linewidth=0.2)
+    plt.title("Visualisation des facettes sur l'espace d'entrée")
     plt.show()
+    
+def visualisation_facettes():#se base sur les entrées calculées au début (N points)
+    list_act_colors=[list_colors[i%148] for i in liste_act]
+    plt.scatter(liste_entrees[:,0],liste_entrees[:,1],c=list_act_colors,linewidth=0.2)
+    plt.show("Visualisation des facettes sur l'espace d'entrée")
