@@ -32,11 +32,11 @@ liste_act=[model.activations_bin(x) for x in liste_entrees]
 ##Dictionnaire: clés=état d'activation (en binaire), valeurs= nombre de points dans la facette
 dic_facettes=col.Counter(liste_act)
 
-def carac_reseau():
+def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
     print("Nombre de couches :",len(model.archi))
     
-def enumeration_facettes(): 
+def enumeration_facettes(): #Renvoie le nombre de facettes, et le nombre de points par facettes
     x=range(len(dic_facettes.keys()))
     h=[dic_facettes[act]for act in dic_facettes.keys()]
     plt.bar(x,h)
@@ -44,22 +44,43 @@ def enumeration_facettes():
     plt.show()
     return len(dic_facettes.keys()),dic_facettes
 
-def partition_facettes():##renvoie un dico (clés=état d'activation (en binaire), valeur=liste des indices des entrées dans la facette)
+def partition_facettes():##Renvoie un dico (clés=état d'activation (en binaire), valeur=liste des indices des entrées dans la facette)
     partition={}
     for act in dic_facettes.keys(): #je choisis une facette
         partition[act]=[]
     for i in range(len(liste_distances)):
        partition[liste_act[i]].append(i)
     return partition
-      
-def mesures_facettes():##renvoie un dico (clés=état d'activation (en binaire), valeur=liste des distances des entrées dans la facette)
+
+def poids_facettes(): #Retourne un histogramme du nombre de facettes en fonction du nombre de points dedans
+    dico={}
+    maximum=0
+    for act in dic_facettes :
+        nbe=dic_facettes[act]
+        if (nbe in dico) :
+            dico[nbe] += 1
+        else :
+            dico[nbe]=1
+            if nbe>maximum:
+                maximum=nbe
+
+    liste_poids=[0]*(maximum+1)
+    for i in range (maximum+1):
+        if i in dico :
+            liste_poids[i]=dico[i]
+    x=range(maximum+1)
+    plt.bar(x,liste_poids)
+    plt.show()
+
+     
+def mesures_facettes():##Renvoie un dico (clés=état d'activation (en binaire), valeur=liste des distances des entrées dans la facette)
     partition=partition_facettes()
     mesures={}
     for act in partition.keys():
         mesures[act]=np.array([liste_distances[j] for j in partition[act]])
     return mesures
 
-def moyenne():
+def moyenne(): #Renvoie des données sur les distances
     mesures=mesures_facettes()
     for act in mesures.keys():
         print(act,"moyenne: ",np.mean(mesures[act]),"max: ",np.max(mesures[act]),"nombres de points: ",len(mesures[act]),"écart-type: ",np.std(mesures[act]))
