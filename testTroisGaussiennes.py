@@ -7,14 +7,18 @@ Created on Wed Feb  5 15:45:10 2025
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import collections as col
 import torch
 import os
 os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
 
+list_colors=[]
+dico_colors=mcolors.CSS4_COLORS
+for key in dico_colors:
+    list_colors.append(dico_colors[key])
 
-
-model = torch.load("model_3g2.pth", weights_only = False)
+model = torch.load("model_3g1.pth", weights_only = False)
 model.eval()
 
 ##Test distances
@@ -34,7 +38,7 @@ dic_facettes=col.Counter(liste_act)
 
 def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
-    print("Nombre de couches :",len(model.archi))
+    print("Nombre de couches :",len(model.archi)-2)
     
 def enumeration_facettes(): #Renvoie le nombre de facettes, et le nombre de points par facettes
     x=range(len(dic_facettes.keys()))
@@ -156,4 +160,14 @@ def affichage_prediction():
             plt.scatter(x, y, c = couleur(predire(model(torch.tensor([x,y],dtype = torch.float32)).detach().numpy())), linewidths=0.2)
     plt.title("Prédiction du réseau sur R2")
     plt.show()
-                
+
+def visualisation_facettes():
+    #◘cmap=plt.get_cmap('viridis')
+    X = np.linspace(-4,4,50)
+    Y = np.linspace(-4, 4,50)
+    for x in X:
+        for y in Y:
+            #print(model.activations_bin(torch.tensor([x,y],dtype = torch.float32))%148)
+            plt.scatter(x,y,c=list_colors[model.activations_bin(torch.tensor([x,y],dtype = torch.float32))%148])
+            #plt.scatter(x,y,c=cmap(model.activations_bin(torch.tensor([x,y],dtype = torch.float32))/256))
+    plt.show()
