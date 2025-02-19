@@ -9,9 +9,19 @@ model = torch.load("model_sphere.pth")
 model.eval()
 
 
-N=10000
+N=1000
 
-liste_entrees= [torch.tensor(np.random.uniform(-10,10,3),dtype=torch.float32) for _ in range(N)]
+##liste_entrees= [torch.tensor(np.random.uniform(-10,10,3),dtype=torch.float32) for _ in range(N)]
+
+x=np.linspace(-10,10,int(np.cbrt(N)))
+y=np.linspace(-10,10,int(np.cbrt(N)))
+z=np.linspace(-10,10,int(np.cbrt(N)))
+
+X, Y,Z =np.meshgrid(x,y,z, indexing='ij')
+
+points=np.column_stack((X.ravel(),Y.ravel(),Z.ravel()))
+
+liste_entrees=torch.tensor(points, dtype=torch.float32)
 
 ##Calcul des distances pour chaque point
 liste_distances=[model.distance(x) for x in liste_entrees]
@@ -21,6 +31,12 @@ liste_act=[model.activations_bin(x) for x in liste_entrees]
 
 ##Dictionnaire: clés=état d'activation (en binaire), valeurs= nombre de points dans la facette
 dic_facettes=col.Counter(liste_act)
+
+def carac_reseau(): #Imprime l'architecture du réseau actuel
+    print("Architecture :",model.archi)
+    print("Nombre de couches :",len(model.archi))
+
+carac_reseau()
 
 def enumeration_facettes(): 
     x=range(len(dic_facettes.keys()))
@@ -32,7 +48,7 @@ def enumeration_facettes():
     plt.show()
     return len(dic_facettes.keys()),dic_facettes
 
-enumeration_facettes()
+##enumeration_facettes()
 
 
 def poids_facettes():
@@ -55,11 +71,34 @@ def poids_facettes():
     plt.bar(x,liste_poids)
     plt.show()
 
-poids_facettes()
+##poids_facettes()
+
+def partition_facettes():##Renvoie un dico (clés=état d'activation (en binaire), valeur=liste des indices des entrées dans la facette)
+    partition={}
+    for act in dic_facettes.keys(): #je choisis une facette
+        partition[act]=[]
+    for i in range(len(liste_distances)):
+       partition[liste_act[i]].append(i)
+    return partition
+
+def mesures_facettes():##Renvoie un dico (clés=état d'activation (en binaire), valeur=liste des distances des entrées dans la facette)
+    partition=partition_facettes()
+    mesures={}
+    for act in partition.keys():
+        mesures[act]=np.array([liste_distances[j] for j in partition[act]])
+    return mesures
+
+def moyenne(): #Renvoie des données sur les distances
+    mesures=mesures_facettes()
+##    for act in mesures.keys():
+##        print(act,"moyenne: ",np.mean(mesures[act]),"max: ",np.max(mesures[act]),"nombres de points: ",len(mesures[act]),"écart-type: ",np.std(mesures[act]))
+    x=range(len(dic_facettes.keys()))
+    h=[mesures[act][0]for act in mesures.keys()]
+    plt.bar(x,sorted(h, reverse = True))
+    plt.show()
+moyenne()
     
     
-
-
 
 ##test du reseau
 
