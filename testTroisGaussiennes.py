@@ -14,7 +14,7 @@ os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorc
 
 
 
-model = torch.load("model_3g1.pth", weights_only = False)
+model = torch.load("model_3g2.pth", weights_only = False)
 model.eval()
 
 ##Test distances
@@ -32,13 +32,15 @@ liste_act=[model.activations_bin(x) for x in liste_entrees]
 ##Dictionnaire: clés=état d'activation (en binaire), valeurs= nombre de points dans la facette
 dic_facettes=col.Counter(liste_act)
 
-
+def carac_reseau():
+    print("Architecture :",model.archi)
+    print("Nombre de couches :",len(model.archi))
+    
 def enumeration_facettes(): 
     x=range(len(dic_facettes.keys()))
     h=[dic_facettes[act]for act in dic_facettes.keys()]
-    plt.bar(x,h,label=["e" for _ in x])
-##problème pour l'affichage des labels
-    plt.title("Répartition des points sur les facettes")
+    plt.bar(x,h)
+    plt.title("Répartition des points sur les facettes pour N = "+str(N))
     plt.show()
     return len(dic_facettes.keys()),dic_facettes
 
@@ -54,11 +56,6 @@ def mesures_facettes():##renvoie un dico (clés=état d'activation (en binaire),
     partition=partition_facettes()
     mesures={}
     for act in partition.keys():
-        # moyenne=0
-        # for i in partition[act]:
-        #     moyenne+=liste_distances[i]
-        # moyenne=moyenne/len(partition[act])
-        # mesures[act]=np.append(mesures[act],moyenne)
         mesures[act]=np.array([liste_distances[j] for j in partition[act]])
     return mesures
 
@@ -67,7 +64,6 @@ def moyenne():
     for act in mesures.keys():
         print(act,"moyenne: ",np.mean(mesures[act]),"max: ",np.max(mesures[act]),"nombres de points: ",len(mesures[act]),"écart-type: ",np.std(mesures[act]))
 
-#moyenne()
 #Test du reseau 
 
 def genDonneesGaussiennes() :
@@ -101,22 +97,25 @@ def accuracy() :
             NbVrai += 1
     return NbVrai/N*100
 
-# N_test = 10
-# X_test = np.zeros((N_test, 2))
-# y_test = np.zeros((N_test, 3))
+def test():
+    #Génère des points de l'entrée à tester et renvoie la prédiction du réseau
+    N_test = 10
+    X_test = np.zeros((N_test, 2))
+    y_test = np.zeros((N_test, 3))
               
-# for i in range(N_test):
-#     res, donnee = genDonneesGaussiennes()
-#     X_test[i] = donnee
-#     y_test[i] = format_res(res)
+    for i in range(N_test):
+        res, donnee = genDonneesGaussiennes()
+        X_test[i] = donnee
+        y_test[i] = format_res(res)
 
-# X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
+    X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
 
-# predictions = model(X_test_tensor).detach().numpy()
+    predictions = model(X_test_tensor).detach().numpy()
 
-# print("Prédictions du modèle:")
-# for i in range(N_test) :
-#     predictions[i],predire(predictions[i]), y_test[i]
+    print("Prédictions du modèle:")
+    print("point,prédiction,gaussienne attendue")
+    for i in range(N_test) :
+        print(predictions[i],predire(predictions[i]), y_test[i])
 
 
 def couleur(res) :
