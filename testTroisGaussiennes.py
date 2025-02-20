@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import collections as col
 import torch
-import os
-os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
+##Lignes pour que ça marche chez Augustin
+# import os
+# os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
 
 
-
-model = torch.load("model_3g1.pth", weights_only = False)
+model = torch.load("model_3g3.pth", weights_only = False)
 model.eval()
 
 ##Test distances
@@ -43,13 +43,14 @@ dic_facettes=col.Counter(liste_act)
 
 def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
-    print("Nombre de couches :",len(model.archi)-2)
+    print("Nombre de couches internes:",len(model.archi)-2)
     
 def enumeration_facettes(): #Renvoie le nombre de facettes, et le nombre de points par facettes
     x=range(len(dic_facettes.keys()))
     h=[dic_facettes[act]for act in dic_facettes.keys()]
     plt.bar(x,h)
-    plt.title("Répartition des points sur les facettes pour N = "+str(N))
+    plt.suptitle("Répartition des points sur les facettes pour N = "+str(N))
+    plt.title("Architecture : " + str(model.archi))
     plt.show()
     return len(dic_facettes.keys()),dic_facettes
 
@@ -91,9 +92,18 @@ def mesures_facettes():##Renvoie un dico (clés=état d'activation (en binaire),
 
 def moyenne(): #Renvoie des données sur les distances
     mesures=mesures_facettes()
-    for act in mesures.keys():
-        print(act,"moyenne: ",np.mean(mesures[act]),"max: ",np.max(mesures[act]),"nombres de points: ",len(mesures[act]),"écart-type: ",np.std(mesures[act]))
-
+##    for act in mesures.keys():
+##        print(act,"moyenne: ",np.mean(mesures[act]),"max: ",np.max(mesures[act]),"nombres de points: ",len(mesures[act]),"écart-type: ",np.std(mesures[act]))
+    x=range(len(dic_facettes.keys()))
+    h=[mesures[act][0]for act in mesures.keys()]
+    plt.bar(x,sorted(h, reverse = True), color = 'b')
+    plt.suptitle("Distance aux frontières moyenne pour chaque facette")
+    plt.title("Architecture : " + str(model.archi))
+    plt.xlabel("facette")
+    plt.ylabel("distance moyenne")
+    plt.show()
+    
+    
 #Test du reseau 
 
 def genDonneesGaussiennes() :
@@ -115,8 +125,7 @@ def predire(res) :
     i = np.argmin(listeNorme)
     return listeRes[i]
 
-def accuracy() :
-    N = 1000
+def accuracy(N) :
     NbVrai = 0 
     for _ in range(N) : 
         res,donnee = genDonneesGaussiennes()
@@ -163,7 +172,8 @@ def affichage_prediction():
     for x in X :
         for y in Y:
             plt.scatter(x, y, c = couleur(predire(model(torch.tensor([x,y],dtype = torch.float32)).detach().numpy())), linewidths=0.2)
-    plt.title("Prédiction du réseau sur R2")
+    plt.suptitle("Prédiction du réseau sur R2")
+    plt.title("Architecture : " + str(model.archi))
     plt.show()
 
 list_colors=[]
@@ -177,10 +187,13 @@ def visualisation_facettes_simple():#crée des points (on peut mettre moins de N
     for x in X:
         for y in Y:    
             plt.scatter(x,y,c=list_colors[model.activations_bin(torch.tensor([x,y],dtype = torch.float32))%148],linewidth=0.2)
-    plt.title("Visualisation des facettes sur l'espace d'entrée")
+    plt.suptitle("Visualisation des facettes sur l'espace d'entrée")
+    plt.title("Architecture : " + str(model.archi))
     plt.show()
     
 def visualisation_facettes():#se base sur les entrées calculées au début (N points)
     list_act_colors=[list_colors[i%148] for i in liste_act]
     plt.scatter(liste_entrees[:,0],liste_entrees[:,1],c=list_act_colors,linewidth=0.2)
-    plt.show("Visualisation des facettes sur l'espace d'entrée")
+    plt.suptitle("Visualisation des facettes sur l'espace d'entrée")
+    plt.title("Architecture : " + str(model.archi))
+    plt.show()

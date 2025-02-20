@@ -1,15 +1,15 @@
 import torch
 import numpy as np
-import reseauPytorch
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import collections as col
 
 
-model = torch.load("model_sphere.pth")
+model = torch.load("model_sphere.pth", weights_only= False)
 model.eval()
 
 
-N=1000
+N=10000
 
 ##liste_entrees= [torch.tensor(np.random.uniform(-10,10,3),dtype=torch.float32) for _ in range(N)]
 
@@ -34,9 +34,9 @@ dic_facettes=col.Counter(liste_act)
 
 def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
-    print("Nombre de couches :",len(model.archi))
+    print("Nombre de couches internes:",len(model.archi)-2)
 
-carac_reseau()
+# carac_reseau()
 
 def enumeration_facettes(): 
     x=range(len(dic_facettes.keys()))
@@ -44,7 +44,8 @@ def enumeration_facettes():
     h=[dic_facettes[act]for act in dic_facettes.keys()]
     plt.bar(x,h)
 ##problème pour l'affichage des labels
-    plt.title("Répartition des points sur les facettes")
+    plt.suptitle("Répartition des points sur les facettes")
+    plt.title("Architecture : " + str(model.archi))
     plt.show()
     return len(dic_facettes.keys()),dic_facettes
 
@@ -95,14 +96,27 @@ def moyenne(): #Renvoie des données sur les distances
     x=range(len(dic_facettes.keys()))
     h=[mesures[act][0]for act in mesures.keys()]
     plt.bar(x,sorted(h, reverse = True))
+    plt.suptitle("Distance aux frontières moyenne pour chaque facette")
+    plt.title("Architecture : " + str(model.archi))
+    plt.xlabel("facette")
+    plt.ylabel("distance moyenne")
     plt.show()
-moyenne()
     
+#moyenne()
     
+list_colors=[]
+dico_colors=mcolors.CSS4_COLORS
+for key in dico_colors:
+    list_colors.append(dico_colors[key])
+
+def visualisation_facettes():#se base sur les entrées calculées au début (N points)
+    list_act_colors=[list_colors[i%148] for i in liste_act]
+    plt.scatter(liste_entrees[:,0],liste_entrees[:,1],liste_entrees[:,2],c=list_act_colors,linewidth=0.2)
+    plt.suptitle("Visualisation des facettes sur l'espace d'entrée")
+    plt.title("Architecture : " + str(model.archi))
+    plt.show()    
 
 ##test du reseau
-
-##N_test=60
 
 def genDonneesSpheriques():
     r = 10
@@ -124,22 +138,23 @@ def predire(predictions):
             resultat.append("En dehors de la sphère")
     return resultat
 
-##X_test = np.zeros((N_test, 3))
-##y_test = np.zeros((N_test, 2))
-
-
-##for i in range(N_test):
-##    res, donnee = genDonneesSpheriques()
-##    X_test[i] = donnee
-##    y_test[i] = res
-
-##X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-##predictions = model(X_test_tensor).detach().numpy()
+def test(N_test) :
+    X_test = np.zeros((N_test, 3))
+    y_test = np.zeros((N_test, 2))
     
-#sortie = predire(predictions)
-
-##for i in range(len(predictions)):
-##    print(f"Valeur réelle: {y_test[i]}, Prédiction: {predictions[i]}, Résultat: {sortie[i]}")
+    
+    for i in range(N_test):
+        res, donnee = genDonneesSpheriques()
+        X_test[i] = donnee
+        y_test[i] = res
+    
+    X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
+    predictions = model(X_test_tensor).detach().numpy()
+        
+    sortie = predire(predictions)
+    
+    for i in range(len(predictions)):
+        print(f"Valeur réelle: {y_test[i]}, Prédiction: {predictions[i]}, Résultat: {sortie[i]}")
 
 def accuracy(predictions, y_test):
     correct = 0
