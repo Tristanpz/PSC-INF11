@@ -111,7 +111,9 @@ for key in dico_colors:
 
 def visualisation_facettes():#se base sur les entrées calculées au début (N points)
     list_act_colors=[list_colors[i%148] for i in liste_act]
-    plt.scatter(liste_entrees[:,0],liste_entrees[:,1],liste_entrees[:,2],c=list_act_colors,linewidth=0.2)
+    fig = plt.figure()
+    ax = fig.add_subplot(projection = '3d')
+    ax.scatter(liste_entrees[:,0],liste_entrees[:,1],liste_entrees[:,2],c=list_act_colors,linewidth=0.1)
     plt.suptitle("Visualisation des facettes sur l'espace d'entrée")
     plt.title("Architecture : " + str(model.archi))
     plt.show()    
