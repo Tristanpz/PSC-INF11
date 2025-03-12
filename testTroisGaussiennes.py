@@ -14,7 +14,7 @@ import torch
 import os
 os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
 
-file="model_3g2663e1.pth"
+file="model_3g2443e1.pth"
 model = torch.load(file, weights_only = False)
 model.eval()
 
@@ -50,14 +50,14 @@ def carac_reseau(): #Imprime l'architecture du réseau actuel
     
 def enumeration_facettes(): #Renvoie le nombre de facettes, et le nombre de points par facettes
     x=range(len(dic_facettes.keys()))
-    h=sorted([dic_facettes[act]for act in dic_facettes.keys()])
+    h=sorted([dic_facettes[act]for act in dic_facettes.keys()],reverse=True)
     plt.bar(x,h)
     plt.suptitle("Répartition des points sur les facettes pour N = "+str(N))
     plt.title(file)
     plt.show()
     return len(dic_facettes.keys()),dic_facettes
 
-def partition_facettes():##Renvoie un dico (clés=état d'activation (en binaire), valeur=liste des indices des entrées dans la facette)
+def partition_facettes():##Renvoie un dico (clés=état d'activation (en binaire), valeur=liste des indices des entrées appartenant à la facette)
     partition={}
     for act in dic_facettes.keys(): #je choisis une facette
         partition[act]=[]
@@ -93,18 +93,39 @@ def mesures_facettes():##Renvoie un dico (clés=état d'activation (en binaire),
         mesures[act]=np.array([liste_distances[j] for j in partition[act]])
     return mesures
 
-def moyenne(): #Renvoie des données sur les distances
+def moyenne_graphe(): #Renvoie des données sur les distances
     mesures=mesures_facettes()
-##    for act in mesures.keys():
-##        print(act,"moyenne: ",np.mean(mesures[act]),"max: ",np.max(mesures[act]),"nombres de points: ",len(mesures[act]),"écart-type: ",np.std(mesures[act]))
     x=range(len(dic_facettes.keys()))
     h=[mesures[act][0]for act in mesures.keys()]
     plt.bar(x,sorted(h, reverse = True), color = 'b')
     plt.suptitle("Distance aux frontières moyenne pour chaque facette")
-    plt.title("Architecture : " + str(model.archi))
+    plt.title(file)
     plt.xlabel("facette")
     plt.ylabel("distance moyenne")
     plt.show()
+
+def maxdist(act):
+    mesures=mesures_facettes()
+    return np.max(mesures[act])
+
+def meandist(act):
+    mesures=mesures_facettes()
+    return np.mean(mesures[act])
+
+def stddist(act):
+    mesures=mesures_facettes()
+    return np.std(mesures[act])
+
+def distribution_distance(act):
+    mesures=mesures_facettes()
+    distance_entrees_facette=mesures[act]
+    plt.hist(distance_entrees_facette,bins="auto")
+    plt.axvline(meandist(act),color="red", label="Distance moyenne")
+    plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act))
+    plt.title(file)
+    plt.legend()
+    plt.show()
+        
     
 def couleur(res) :
     if np.array_equal(res, [1,0,0]) :
