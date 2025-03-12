@@ -11,14 +11,13 @@ import matplotlib.colors as mcolors
 import collections as col
 import torch
 ##Lignes pour que ça marche chez Augustin
-# import os
-# os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
+import os
+os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
 
-
-model = torch.load("model_3g3.pth", weights_only = False)
+file="model_3g2663e1.pth"
+model = torch.load(file, weights_only = False)
 model.eval()
 
-##Test distances
 
 N=10000
 ##Création de N points randoms de l'espace d'entrée
@@ -41,16 +40,20 @@ liste_act=[model.activations_bin(x) for x in liste_entrees]
 ##Dictionnaire: clés=état d'activation (en binaire), valeurs= nombre de points dans la facette
 dic_facettes=col.Counter(liste_act)
 
+
+## Etude du réseau
+
+
 def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
     print("Nombre de couches internes:",len(model.archi)-2)
     
 def enumeration_facettes(): #Renvoie le nombre de facettes, et le nombre de points par facettes
     x=range(len(dic_facettes.keys()))
-    h=[dic_facettes[act]for act in dic_facettes.keys()]
+    h=sorted([dic_facettes[act]for act in dic_facettes.keys()])
     plt.bar(x,h)
     plt.suptitle("Répartition des points sur les facettes pour N = "+str(N))
-    plt.title("Architecture : " + str(model.archi))
+    plt.title(file)
     plt.show()
     return len(dic_facettes.keys()),dic_facettes
 
@@ -103,6 +106,45 @@ def moyenne(): #Renvoie des données sur les distances
     plt.ylabel("distance moyenne")
     plt.show()
     
+def couleur(res) :
+    if np.array_equal(res, [1,0,0]) :
+        return 'r'
+    if np.array_equal(res, [0,1,0]):
+        return 'g'
+    if np.array_equal(res, [0,0,1]) :
+        return 'b'
+
+def affichage_prediction():   ##afficher les prédictions du réseau sur l'espace d'entrée
+    X = np.linspace(-4,4,20)
+    Y = np.linspace(-4, 4,20)
+    for x in X :
+        for y in Y:
+            plt.scatter(x, y, c = couleur(predire(model(torch.tensor([x,y],dtype = torch.float32)).detach().numpy())), linewidths=0.2)
+    plt.suptitle("Prédiction du réseau sur R2")
+    plt.title(file)
+    plt.show()
+
+list_colors=[]
+dico_colors=mcolors.CSS4_COLORS
+for key in dico_colors:
+    list_colors.append(dico_colors[key])
+
+def visualisation_facettes_simple(n):#crée des points (on peut mettre moins de N points)
+    X = np.linspace(-4,4,n)
+    Y = np.linspace(-4, 4,n)
+    for x in X:
+        for y in Y:    
+            plt.scatter(x,y,c=list_colors[model.activations_bin(torch.tensor([x,y],dtype = torch.float32))%148],linewidth=0.2)
+    plt.suptitle("Visualisation des facettes sur l'espace d'entrée")
+    plt.title(file)
+    plt.show()
+    
+def visualisation_facettes():#se base sur les entrées calculées au début (N points)
+    list_act_colors=[list_colors[i%148] for i in liste_act]
+    plt.scatter(liste_entrees[:,0],liste_entrees[:,1],c=list_act_colors,linewidth=0.2)
+    plt.suptitle("Visualisation des facettes sur l'espace d'entrée")
+    plt.title(file)
+    plt.show()
     
 #Test du reseau 
 
@@ -157,43 +199,3 @@ def test():
         print(predictions[i],predire(predictions[i]), y_test[i])
 
 
-def couleur(res) :
-    if np.array_equal(res, [1,0,0]) :
-        return 'r'
-    if np.array_equal(res, [0,1,0]):
-        return 'g'
-    if np.array_equal(res, [0,0,1]) :
-        return 'b'
-    print("bruh")
-
-def affichage_prediction():   
-    X = np.linspace(-4,4,20)
-    Y = np.linspace(-4, 4,20)
-    for x in X :
-        for y in Y:
-            plt.scatter(x, y, c = couleur(predire(model(torch.tensor([x,y],dtype = torch.float32)).detach().numpy())), linewidths=0.2)
-    plt.suptitle("Prédiction du réseau sur R2")
-    plt.title("Architecture : " + str(model.archi))
-    plt.show()
-
-list_colors=[]
-dico_colors=mcolors.CSS4_COLORS
-for key in dico_colors:
-    list_colors.append(dico_colors[key])
-    
-def visualisation_facettes_simple():#crée des points (on peut mettre moins de N points)
-    X = np.linspace(-4,4,50)
-    Y = np.linspace(-4, 4,50)
-    for x in X:
-        for y in Y:    
-            plt.scatter(x,y,c=list_colors[model.activations_bin(torch.tensor([x,y],dtype = torch.float32))%148],linewidth=0.2)
-    plt.suptitle("Visualisation des facettes sur l'espace d'entrée")
-    plt.title("Architecture : " + str(model.archi))
-    plt.show()
-    
-def visualisation_facettes():#se base sur les entrées calculées au début (N points)
-    list_act_colors=[list_colors[i%148] for i in liste_act]
-    plt.scatter(liste_entrees[:,0],liste_entrees[:,1],c=list_act_colors,linewidth=0.2)
-    plt.suptitle("Visualisation des facettes sur l'espace d'entrée")
-    plt.title("Architecture : " + str(model.archi))
-    plt.show()
