@@ -22,7 +22,7 @@ model1 = torch.load("model_3g3.pth", weights_only = False)
 model1.eval()
 modelBis = torch.load("model_3g3bis.pth", weights_only = False)
 modelBis.eval()
-
+L_file = ["model_3g3nonEnt1.pth", "model_3g3nonEnt2.pth", "model_3g3nonEnt3.pth", "model_3g3.pth", "model_3g3bis.pth"]
 listeModels = [modelNonEnt1, modelNonEnt2, modelNonEnt1, model1, modelBis]
 n = len(listeModels)
 N = 1000
@@ -48,6 +48,71 @@ L_nb_facettes = [len(L_dic_facettes[i]) for i in range(n)]
 print(L_nb_facettes)
 
 
+
+## Etude du réseau
+
+
+def carac_reseau(i): #Imprime l'architecture du réseau actuel
+    print("Architecture :",listeModels[i].archi)
+    print("Nombre de couches internes:",len(listeModels[i].archi)-2)
+    
+def enumeration_facettes(i): #Renvoie le nombre de facettes, et le nombre de points par facettes
+    x=range(len(L_dic_facettes[i]))
+    h=sorted([L_dic_facettes[i][act]for act in L_dic_facettes[i]])
+    plt.bar(x,h)
+    plt.suptitle("Répartition des points sur les facettes pour N = "+str(N))
+    plt.title(L_file[i])
+    plt.show()
+    return len(L_dic_facettes[i]),L_dic_facettes[i]
+
+def partition_facettes(idx):##Renvoie un dico (clés=état d'activation (en binaire), valeur=liste des indices des entrées dans la facette)
+    partition={}
+    for act in L_dic_facettes[idx]: #je choisis une facette
+        partition[act]=[]
+    for i in range(len(L_liste_distances[idx])):
+       partition[L_liste_act[idx][i]].append(i)
+    return partition
+
+def poids_facettes(idx): #Retourne un histogramme du nombre de facettes en fonction du nombre de points dedans
+    dico={}
+    maximum=0
+    for act in L_dic_facettes[idx] :
+        nbe=L_dic_facettes[idx][act]
+        if (nbe in dico) :
+            dico[nbe] += 1
+        else :
+            dico[nbe]=1
+            if nbe>maximum:
+                maximum=nbe
+
+    liste_poids=[0]*(maximum+1)
+    for i in range (maximum+1):
+        if i in dico :
+            liste_poids[i]=dico[i]
+    x=range(maximum+1)
+    plt.bar(x,liste_poids)
+    plt.show()
+
+     
+def mesures_facettes(idx):##Renvoie un dico (clés=état d'activation (en binaire), valeur=liste des distances des entrées dans la facette)
+    partition=partition_facettes()
+    mesures={}
+    for act in partition.keys():
+        mesures[act]=np.array([L_liste_distances[idx][j] for j in partition[act]])
+    return mesures
+
+def moyenne(idx): #Renvoie des données sur les distances
+    mesures=mesures_facettes()
+##    for act in mesures.keys():
+##        print(act,"moyenne: ",np.mean(mesures[act]),"max: ",np.max(mesures[act]),"nombres de points: ",len(mesures[act]),"écart-type: ",np.std(mesures[act]))
+    x=range(len(L_dic_facettes[idx]))
+    h=[mesures[act][0]for act in mesures.keys()]
+    plt.bar(x,sorted(h, reverse = True), color = 'b')
+    plt.suptitle("Distance aux frontières moyenne pour chaque facette")
+    plt.title("Architecture : " + str(listeModels[i].archi))
+    plt.xlabel("facette")
+    plt.ylabel("distance moyenne")
+    plt.show()
 
 
 def genDonneesGaussiennes() :
@@ -144,4 +209,4 @@ def visualisation_facettes(i):#se base sur les entrées calculées au début (N 
 
 for i in range(n) :
     print(accuracy(1000, i))
-    visualisation_facettes(i)
+    affichage_prediction(i)
