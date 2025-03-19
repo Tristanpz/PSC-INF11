@@ -37,7 +37,7 @@ X_tensor = torch.tensor(X, dtype=torch.float32)
 y_tensor = torch.tensor(y, dtype=torch.float32)
 
 num_epochs = 100
-nbBatch = 20
+nbBatch = 100
 
 model = reseauPytorch.creerReseau([2,4,4,3])
 reseauPytorch.entrainerReseau(model, X_tensor, y_tensor, num_epochs, nbBatch)

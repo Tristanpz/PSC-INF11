@@ -126,4 +126,5 @@ def entrainerReseau(model, X_tensor, y_tensor, num_epochs= 100, nbBatch = 1) :
         
     plt.plot(range(num_epochs*nbBatch), np.array(listePerte))
     plt.title("Evolution de la perte au cours de l'entrainement")
+    plt.xlabel("epochs*bachs")
     plt.show()
