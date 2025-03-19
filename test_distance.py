@@ -59,23 +59,5 @@ test_distance(point_ref, 500, 50*model.distance(point_ref))
 print(model.distance(point_ref))
 
 
-def test(nombre_points, nombre_test):
-    for _ in range(nombre_points):
-        
-        point_ref = torch.tensor(np.random.uniform(-10, 10, (3,)), dtype=torch.float32)
-        distance = model.distance(point_ref)
-
-        print(f"\nPoint de référence: {point_ref.numpy()}")
-        print(f"Distance : {distance}")
-
-        epsilon = 0.0
-        test = True
-        while epsilon <= distance and test==True:
-            test = test_distance(point_ref, nombre_test, epsilon)
-            epsilon += 0.01
-        return test, epsilon
-            
-
-print(test(20, 500))
 
     
