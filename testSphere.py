@@ -1,11 +1,12 @@
 import torch
 import numpy as np
+import reseauPytorch
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import collections as col
 
 
-model = torch.load("model_sphere.pth", weights_only= False)
+file = "model_sphere.pth"
+model = torch.load(file)
 model.eval()
 
 
@@ -34,9 +35,8 @@ dic_facettes=col.Counter(liste_act)
 
 def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
-    print("Nombre de couches internes:",len(model.archi)-2)
+    print("Nombre de couches :",len(model.archi))
 
-# carac_reseau()
 
 def enumeration_facettes(): 
     x=range(len(dic_facettes.keys()))
@@ -44,8 +44,7 @@ def enumeration_facettes():
     h=[dic_facettes[act]for act in dic_facettes.keys()]
     plt.bar(x,h)
 ##problème pour l'affichage des labels
-    plt.suptitle("Répartition des points sur les facettes")
-    plt.title("Architecture : " + str(model.archi))
+    plt.title("Répartition des points sur les facettes")
     plt.show()
     return len(dic_facettes.keys()),dic_facettes
 
@@ -96,29 +95,44 @@ def moyenne(): #Renvoie des données sur les distances
     x=range(len(dic_facettes.keys()))
     h=[mesures[act][0]for act in mesures.keys()]
     plt.bar(x,sorted(h, reverse = True))
-    plt.suptitle("Distance aux frontières moyenne pour chaque facette")
-    plt.title("Architecture : " + str(model.archi))
-    plt.xlabel("facette")
-    plt.ylabel("distance moyenne")
     plt.show()
     
-#moyenne()
-    
-list_colors=[]
-dico_colors=mcolors.CSS4_COLORS
-for key in dico_colors:
-    list_colors.append(dico_colors[key])
+moyenne()
 
-def visualisation_facettes():#se base sur les entrées calculées au début (N points)
-    list_act_colors=[list_colors[i%148] for i in liste_act]
-    fig = plt.figure()
-    ax = fig.add_subplot(projection = '3d')
-    ax.scatter(liste_entrees[:,0],liste_entrees[:,1],liste_entrees[:,2],c=list_act_colors,linewidth=0.1)
-    plt.suptitle("Visualisation des facettes sur l'espace d'entrée")
-    plt.title("Architecture : " + str(model.archi))
-    plt.show()    
+def maxdist(act):
+    mesures=mesures_facettes()
+    return np.max(mesures[act])
+
+def meandist(act):
+    mesures=mesures_facettes()
+    return np.mean(mesures[act])
+
+def stddist(act):
+    mesures=mesures_facettes()
+    return np.std(mesures[act])
+
+def distribution_distance(act):
+    mesures=mesures_facettes()
+    distance_entrees_facette=mesures[act]
+    plt.hist(distance_entrees_facette,bins="auto")
+    plt.axvline(meandist(act),color="red", label="Distance moyenne")
+    plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act))
+    plt.title(file)
+    plt.legend()
+    plt.show()
+
+def couleur(res):
+    if np.array_equal(res, [1, 0]):
+        return 'b'
+    if np.array_equal(res, [0, 1]):
+        return 'r'
+
+
+
 
 ##test du reseau
+
+##N_test=60
 
 def genDonneesSpheriques():
     r = 10
@@ -140,23 +154,22 @@ def predire(predictions):
             resultat.append("En dehors de la sphère")
     return resultat
 
-def test(N_test) :
-    X_test = np.zeros((N_test, 3))
-    y_test = np.zeros((N_test, 2))
+##X_test = np.zeros((N_test, 3))
+##y_test = np.zeros((N_test, 2))
+
+
+##for i in range(N_test):
+##    res, donnee = genDonneesSpheriques()
+##    X_test[i] = donnee
+##    y_test[i] = res
+
+##X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
+##predictions = model(X_test_tensor).detach().numpy()
     
-    
-    for i in range(N_test):
-        res, donnee = genDonneesSpheriques()
-        X_test[i] = donnee
-        y_test[i] = res
-    
-    X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-    predictions = model(X_test_tensor).detach().numpy()
-        
-    sortie = predire(predictions)
-    
-    for i in range(len(predictions)):
-        print(f"Valeur réelle: {y_test[i]}, Prédiction: {predictions[i]}, Résultat: {sortie[i]}")
+#sortie = predire(predictions)
+
+##for i in range(len(predictions)):
+##    print(f"Valeur réelle: {y_test[i]}, Prédiction: {predictions[i]}, Résultat: {sortie[i]}")
 
 def accuracy(predictions, y_test):
     correct = 0
@@ -168,3 +181,6 @@ def accuracy(predictions, y_test):
     return correct / len(predictions) * 100  
 
 #print ("Accuracy: ",accuracy(predictions, y_test), "%")
+
+
+
