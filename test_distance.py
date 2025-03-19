@@ -46,11 +46,11 @@ def test_distance(point, nombre_test, epsilon):
             meme_facette = False
             break
 
-#   print(f"Point de référence: {point.numpy()}")
-#   print(f"Activation de référence: {activation}")
-#   print(f"Tous dans la même facette ? {'Oui' if meme_facette else 'Non'}")
+    print(f"Point de référence: {point.numpy()}")
+    print(f"Activation de référence: {activation}")
+    print(f"Tous dans la même facette ? {'Oui' if meme_facette else 'Non'}")
 
-    return meme_facette
+
 
 # Generation d'un point de reference
 point_ref = torch.tensor(np.random.uniform(-10, 10, (3,)), dtype=torch.float32)
