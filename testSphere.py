@@ -181,6 +181,9 @@ def accuracy(predictions, y_test):
     return correct / len(predictions) * 100  
 
 #print ("Accuracy: ",accuracy(predictions, y_test), "%")
+etat_activation = list(dic_facettes.keys())[1]
+distribution_distance(etat_activation)
+
 
 
 
