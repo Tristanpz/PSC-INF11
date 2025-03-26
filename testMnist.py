@@ -43,6 +43,9 @@ sorted_facettes=sorted(dic_facettes.items(), key=operator.itemgetter(1), reverse
 def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
     print("Nombre de couches internes:",len(model.archi)-2)
+
+def strCaracrReseau():
+    return "Architecture :" + str(model.archi)
     
 def enumeration_facettes(): #Renvoie le nombre de facettes
     x=range(len(dic_facettes.keys()))
@@ -92,7 +95,8 @@ def poids_facettes(): #Retourne un histogramme du nombre de facettes en fonction
             liste_poids[i]=dico[i]
     x=range(maximum+1)
     plt.bar(x,liste_poids)
-    plt.title("Histogramme représentant le nombre de facettes selon leur taille (nombre de points de l'espace d'entrée)")
+    plt.suptitle("Histogramme représentant le nombre de facettes selon leur taille (nombre de points de l'espace d'entrée)")
+    plt.title(strCaracReseau())
     plt.xlabel("Nombre de points dans la facette")
     plt.ylabel("Nombre de facettes")
     plt.show()
@@ -111,7 +115,7 @@ def moyenne_graphe(): #Renvoie des données sur les distances
     h=[mesures[act][0]for act in mesures.keys()]
     plt.bar(x,sorted(h, reverse = True), color = 'b')
     plt.suptitle("Distance aux frontières moyenne pour chaque facette")
-    plt.title(file)
+    plt.title(strCaracReseau())
     plt.xlabel("facette")
     plt.ylabel("distance moyenne")
     plt.show()
@@ -134,6 +138,7 @@ def distribution_distance(act):
     plt.hist(distance_entrees_facette,bins="auto")
     plt.axvline(meandist(act),color="red", label="Distance moyenne")
     plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act)+" nombre de points: "+str(dic_facettes[act]))
+    plt.title(strCaracReseau)
     plt.xlabel("Distance à la frontière")
     plt.ylabel("Nombre de points")
     plt.title(file)
