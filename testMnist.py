@@ -43,10 +43,6 @@ sorted_facettes=sorted(dic_facettes.items(), key=operator.itemgetter(1), reverse
 def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
     print("Nombre de couches internes:",len(model.archi)-2)
-
-def carac_reseau(): #Imprime l'architecture du réseau actuel
-    print("Architecture :",model.archi)
-    print("Nombre de couches internes:",len(model.archi)-2)
     
 def enumeration_facettes(): #Renvoie le nombre de facettes
     x=range(len(dic_facettes.keys()))
@@ -135,13 +131,9 @@ def stddist(act):
 def distribution_distance(act):
     mesures=mesures_facettes()
     distance_entrees_facette=mesures[act]
-    mean = meandist(act)
-    sigma = stddist(act)
     plt.hist(distance_entrees_facette,bins="auto")
-    plt.axvline(mean,color="red", label="Distance moyenne")
-    plt.axvline(mean+sigma, color ="green", label = "écart-type")
-    plt.axvline(mean-sigma, color = "green")
-    plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act))
+    plt.axvline(meandist(act),color="red", label="Distance moyenne")
+    plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act)+" nombre de points: "+str(dic_facettes[act]))
     plt.xlabel("Distance à la frontière")
     plt.ylabel("Nombre de points")
     plt.title(file)
