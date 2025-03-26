@@ -9,7 +9,7 @@ import matplotlib.colors as mcolors
 
 
 file = "model_sphere.pth"
-model = torch.load(file)
+model = torch.load(file,weights_only=False)
 model.eval()
 
 
@@ -46,6 +46,8 @@ def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
     print("Nombre de couches :",len(model.archi))
 
+def strCaracReseau():
+    return "Architecture :" + str(model.archi) + " " + file[-6:-4]
 
 def enumeration_facettes(): 
     x=range(len(dic_facettes.keys()))
@@ -143,11 +145,14 @@ def distribution_distance(act):
     plt.hist(distance_entrees_facette,bins="auto")
     plt.axvline(meandist(act),color="red", label="Distance moyenne")
     plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act))
-    plt.title(file)
+    plt.title(strCaracReseau())
     plt.legend()
     plt.show()
 
-
+def distribution_facettes(n):
+    f_max=facettes_max(n)
+    for i in range(n):
+        distribution_distance(f_max[i][0])
 
 
 
@@ -225,7 +230,7 @@ def visualisation_facettes():
     plt.scatter(points[:, 0], points[:, 1], 
                 c=list_act_colors, linewidth=0.2)
     plt.suptitle("Visualisation des facettes après PCA")
-    plt.title(file)
+    plt.title(strCaracReseau())
     plt.xlabel("Composante 1")    
     plt.ylabel("Composante 2")
     plt.show()
