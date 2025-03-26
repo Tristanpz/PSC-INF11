@@ -44,7 +44,7 @@ def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
     print("Nombre de couches internes:",len(model.archi)-2)
 
-def strCaracrReseau():
+def strCaracReseau():
     return "Architecture :" + str(model.archi)
     
 def enumeration_facettes(): #Renvoie le nombre de facettes
