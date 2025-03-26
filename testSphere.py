@@ -3,6 +3,9 @@ import numpy as np
 import reseauPytorch
 import matplotlib.pyplot as plt
 import collections as col
+import operator
+from sklearn.decomposition import PCA
+import matplotlib.colors as mcolors
 
 
 file = "model_sphere.pth"
@@ -33,6 +36,12 @@ liste_act=[model.activations_bin(x) for x in liste_entrees]
 ##Dictionnaire: clés=état d'activation (en binaire), valeurs= nombre de points dans la facette
 dic_facettes=col.Counter(liste_act)
 
+##liste contenant des coupes (etat d'activation, nombre de points dans la facette) triés par nombre de pts décroissant
+sorted_facettes=sorted(dic_facettes.items(), key=operator.itemgetter(1), reverse=True)
+
+
+## Etude du réseau
+
 def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
     print("Nombre de couches :",len(model.archi))
@@ -49,6 +58,21 @@ def enumeration_facettes():
     return len(dic_facettes.keys()),dic_facettes
 
 ##enumeration_facettes()
+
+def facette_max(): ##renvoie la facette la plus grande et son nombre de points
+    nbpoints=[dic_facettes[act] for act in dic_facettes]
+    
+    nbpoints=0
+    for act in dic_facettes:
+        if dic_facettes[act]>nbpoints:
+            nbpoints=dic_facettes[act]
+            actmax=act
+    return actmax,nbpoints
+
+def facettes_max(n):
+    return sorted_facettes[:n]
+
+
 
 
 def poids_facettes():
@@ -72,6 +96,8 @@ def poids_facettes():
     plt.show()
 
 ##poids_facettes()
+
+
 
 def partition_facettes():##Renvoie un dico (clés=état d'activation (en binaire), valeur=liste des indices des entrées dans la facette)
     partition={}
@@ -97,7 +123,7 @@ def moyenne(): #Renvoie des données sur les distances
     plt.bar(x,sorted(h, reverse = True))
     plt.show()
     
-moyenne()
+#moyenne()
 
 def maxdist(act):
     mesures=mesures_facettes()
@@ -121,11 +147,6 @@ def distribution_distance(act):
     plt.legend()
     plt.show()
 
-def couleur(res):
-    if np.array_equal(res, [1, 0]):
-        return 'b'
-    if np.array_equal(res, [0, 1]):
-        return 'r'
 
 
 
@@ -181,9 +202,33 @@ def accuracy(predictions, y_test):
     return correct / len(predictions) * 100  
 
 #print ("Accuracy: ",accuracy(predictions, y_test), "%")
-etat_activation = list(dic_facettes.keys())[1]
-distribution_distance(etat_activation)
 
 
 
 
+#5 facettes les plus peuplées
+facettes = facettes_max(5)  
+
+for act, _ in facettes:  
+    distribution_distance(act)
+
+num_colors = len(dic_facettes.keys())
+list_colors = []
+dico_colors = list(mcolors.XKCD_COLORS.values())  
+list_colors = dico_colors[:num_colors]
+
+def visualisation_facettes():
+    pca = PCA(n_components=2)
+    points = pca.fit_transform(liste_entrees.numpy())  
+    list_act_colors = [list_colors[i % num_colors] for i in liste_act]
+    plt.figure(figsize=(8, 6))
+    plt.scatter(points[:, 0], points[:, 1], 
+                c=list_act_colors, linewidth=0.2)
+    plt.suptitle("Visualisation des facettes après PCA")
+    plt.title(file)
+    plt.xlabel("Composante 1")    
+    plt.ylabel("Composante 2")
+    plt.show()
+
+
+visualisation_facettes()
