@@ -45,14 +45,14 @@ def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Nombre de couches internes:",len(model.archi)-2)
 
 def strCaracReseau():
-    return "Architecture :" + str(model.archi)
+    return "Architecture :" + str(model.archi) + " " + file[-6:-4]
     
 def enumeration_facettes(): #Renvoie le nombre de facettes
     x=range(len(dic_facettes.keys()))
     h=sorted([dic_facettes[act]for act in dic_facettes.keys()],reverse=True)
     plt.bar(x,h)
     plt.suptitle("Répartition des points sur les facettes")
-    plt.title(file)
+    plt.title(strCaracReseau())
     plt.show()
     return len(dic_facettes.keys())
 
@@ -138,10 +138,9 @@ def distribution_distance(act):
     plt.hist(distance_entrees_facette,bins="auto")
     plt.axvline(meandist(act),color="red", label="Distance moyenne")
     plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act)+" nombre de points: "+str(dic_facettes[act]))
-    plt.title(strCaracReseau)
+    plt.title(strCaracReseau())
     plt.xlabel("Distance à la frontière")
     plt.ylabel("Nombre de points")
-    plt.title(file)
     plt.legend()
     plt.show()
 
@@ -174,4 +173,6 @@ def test():
     print("Prédictions du modèle:")
     for i in range(len(predictions)) :
         print(predire(predictions[i]), y_test[i])
+
+
 

@@ -4,6 +4,8 @@ Created on Wed Mar 19 13:59:40 2025
 
 @author: Utilisateur
 """
+##Lignes pour que ça marche chez Augustin
+
 import os
 os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
 import torch
@@ -29,9 +31,9 @@ X_test= torch.tensor(x_test, dtype=torch.float32)
 num_epochs = 80
 nbBatch = 200
 
-model = reseauPytorch.creerReseau([28**2,28,10,10])
-reseauPytorch.entrainerReseau(model, X_train, Y_train, num_epochs, nbBatch)
+model = reseauPytorch.creerReseau([28**2,10,10,10])
+#reseauPytorch.entrainerReseau(model, X_train, Y_train, num_epochs, nbBatch)
 
 
-torch.save(model, "model_mnist784281010e0.pth")
+torch.save(model, "model_mnist784101010ne0.pth")
 
