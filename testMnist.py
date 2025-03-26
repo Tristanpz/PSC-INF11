@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import collections as col
 import torch
+import operator
 
 from entrainementMnist import X_test,y_test
 
@@ -20,9 +21,6 @@ os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorc
 file="model_mnist7842810e6.pth"
 model = torch.load(file, weights_only = False)
 model.eval()
-
-
-
 
 
 liste_entrees= X_test
@@ -36,8 +34,10 @@ liste_act=[model.activations_bin(x) for x in liste_entrees]
 ##Dictionnaire: clés=état d'activation (en binaire), valeurs= nombre de points dans la facette
 dic_facettes=col.Counter(liste_act)
 
+##liste contenant des coupes (etat d'activation, nombre de points dans la facette) triés par nombre de pts décroissant
+sorted_facettes=sorted(dic_facettes.items(), key=operator.itemgetter(1), reverse=True)
 
-# ## Etude du réseau
+## Etude du réseau
 
 
 def carac_reseau(): #Imprime l'architecture du réseau actuel
@@ -53,7 +53,7 @@ def enumeration_facettes(): #Renvoie le nombre de facettes
     plt.show()
     return len(dic_facettes.keys())
 
-def facette_max():
+def facette_max(): ##renvoie la facette la plus grande et son nombre de points
     nbpoints=[dic_facettes[act] for act in dic_facettes]
     
     nbpoints=0
@@ -62,6 +62,9 @@ def facette_max():
             nbpoints=dic_facettes[act]
             actmax=act
     return actmax,nbpoints
+
+def facettes_max(n):
+    return sorted_facettes[:n]
 
 def partition_facettes():##Renvoie un dico (clés=état d'activation (en binaire), valeur=liste des indices des entrées appartenant à la facette)
     partition={}
