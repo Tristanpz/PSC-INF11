@@ -18,11 +18,11 @@ from entrainementMnist import X_test,y_test
 import os
 os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
 
-file="model_mnist7842810e6.pth"
+file="model_mnist784101010e0.pth"
 model = torch.load(file, weights_only = False)
 model.eval()
 
-
+#%%
 liste_entrees= X_test
 
 ##Calcul des distances pour chaque point
@@ -37,7 +37,7 @@ dic_facettes=col.Counter(liste_act)
 ##liste contenant des coupes (etat d'activation, nombre de points dans la facette) triés par nombre de pts décroissant
 sorted_facettes=sorted(dic_facettes.items(), key=operator.itemgetter(1), reverse=True)
 
-## Etude du réseau
+#%%# Etude du réseau
 
 
 def carac_reseau(): #Imprime l'architecture du réseau actuel
@@ -133,14 +133,20 @@ def distribution_distance(act):
     distance_entrees_facette=mesures[act]
     plt.hist(distance_entrees_facette,bins="auto")
     plt.axvline(meandist(act),color="red", label="Distance moyenne")
-    plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act))
+    plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act)+" nombre de points: "+str(dic_facettes[act]))
     plt.xlabel("Distance à la frontière")
     plt.ylabel("Nombre de points")
     plt.title(file)
     plt.legend()
     plt.show()
-    
-# #Test du reseau 
+
+def distribution_facettes(n):
+    f_max=facettes_max(n)
+    for i in range(n):
+        distribution_distance(f_max[i][0])
+
+
+#%%#Test du reseau 
 
 def softmax(x):
     """Compute softmax values for each sets of scores in x."""
