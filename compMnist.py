@@ -52,14 +52,25 @@ def carac_reseau(i): #Imprime l'architecture du réseau actuel
     print("Architecture :",listmodels[i].archi)
     print("Nombre de couches internes:",len(listmodels[i].archi)-2)
     
-def enumeration_facettes(i): #Renvoie le nombre de facettes
-    x=range(len(L_dic_facettes[i].keys()))
-    h=sorted([L_dic_facettes[i][act]for act in L_dic_facettes[i].keys()],reverse=True)
-    plt.bar(x,h)
-    plt.suptitle("Répartition des points sur les facettes")
-    plt.title(listfiles[i])
-    plt.show()
-    return len(L_dic_facettes[i].keys())
+def enumeration_facettes(): #Renvoie le nombre de facettes
+    for i in range(k):
+        x=range(len(L_dic_facettes[i].keys()))
+        h=sorted([L_dic_facettes[i][act]for act in L_dic_facettes[i].keys()],reverse=True)
+        plt.bar(x,h)
+        plt.suptitle("Répartition des points sur les facettes")
+        plt.title(listfiles[i])
+        plt.show()
+    return [len(L_dic_facettes[i].keys())for i in range(k)]
+
+def ecart_facettes():
+    for i in range(k):
+        x=range(len(L_dic_facettes[i].keys()))
+        h=sorted([stddist(act, i) for act in L_dic_facettes[i].keys()],reverse=True)
+        plt.bar(x,h)
+        plt.suptitle("Variances des facettes")
+        plt.title(listfiles[i])
+        plt.show()
+    return [len(L_dic_facettes[i].keys())for i in range(k)]
 
 def facette_max(i): ##renvoie la facette la plus grande et son nombre de points
     nbpoints=[L_dic_facettes[i][act] for act in L_dic_facettes[i]]
