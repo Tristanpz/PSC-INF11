@@ -115,6 +115,7 @@ def quality_check(N):
         distance_empirique = sortie_facette(point, 100, 0.001)
         L[i] = distance_empirique / sous_approximation
     print(np.mean(L))
+    print(np.std(L))
 
 quality_check(100)
     
