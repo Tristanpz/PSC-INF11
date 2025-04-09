@@ -78,7 +78,7 @@ class LinearRegressionModel(nn.Module):
             B = np.matmul(poidsCorr, B) + np.matmul(activLayer,layer.bias.data.numpy())
         return W, B
     
-    def distance(self, x) :
+    def sousDistance(self, x) :
         d = np.inf
         produitMaxi = 1
         order = 2
@@ -104,7 +104,7 @@ class LinearRegressionModel(nn.Module):
             produitMaxi *= maximum
         return d
     
-    def distanceBis(self, x) :
+    def distance(self, x) :
         dmin = np.inf
         layer = self.linearReluStack[0]
         x = layer(x)
