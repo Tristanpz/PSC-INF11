@@ -45,6 +45,8 @@ class LinearRegressionModel(nn.Module):
         for i in range(0, len(self.linearReluStack)-1, 2):
             x = self.linearReluStack[i](x)
             activation.append((x > 0).int().detach().numpy())
+            x = nn.ReLU()(x)
+            
         return activation 
     
     def act_to_binaire(self, activation):
@@ -99,7 +101,30 @@ class LinearRegressionModel(nn.Module):
             if  distTemp < d : 
                 d = distTemp
             produitMaxi *= maximum
-        return d 
+        return d
+    
+    def distanceBis(self, x) :
+        layer = self.linearReluStack[0]
+        x = layer(x)
+        x_mod = x.detach().numpy()
+        W = layer.weight.data.numpy()
+        U = W
+        dmin = np.min([abs(x_mod[j])/np.linalg.norm(U[j,:]) for j in range(np.shape(U)[0])])
+     
+        for i in range(2, len(self.linearReluStack)-1, 2):
+            x = nn.ReLU()(x)
+            layer = self.linearReluStack[i]
+            A = np.diag((x > 0).int().detach().numpy())
+            x = layer(x)
+            x_mod = x.detach().numpy()
+            W = layer.weight.data.numpy()
+            U = np.dot(W,np.dot(A,U))
+            #print(np.linalg.norm(U[j,:]), x_mod[j])
+            for j in range(np.shape(U)[0]) :
+                if np.linalg.norm(U[j,:]) != 0 :
+                    dmin = min(dmin, abs(x_mod[j])/np.linalg.norm(U[j,:]))
+        return dmin
+            
         
 def creerReseau(archi) :   
     return LinearRegressionModel(archi)
@@ -126,5 +151,4 @@ def entrainerReseau(model, X_tensor, y_tensor, num_epochs= 100, nbBatch = 1) :
         
     plt.plot(range(num_epochs*nbBatch), np.array(listePerte))
     plt.title("Evolution de la perte au cours de l'entrainement")
-    plt.xlabel("epochs*bachs")
     plt.show()
