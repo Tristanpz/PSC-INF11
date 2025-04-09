@@ -83,7 +83,7 @@ class LinearRegressionModel(nn.Module):
         produitMaxi = 1
         order = 2
         for i in range(0, len(self.linearReluStack)-1, 2):  
-            if not i :
+            if i :
                 x = nn.ReLU()(x)
                 order = 1
             layer = self.linearReluStack[i]
@@ -112,8 +112,6 @@ class LinearRegressionModel(nn.Module):
         U = layer.weight.data.numpy()
         for j in range(np.shape(U)[0]) :
             dmin = min(dmin, abs(x_mod[j])/np.linalg.norm(U[j,:], ord=2))
-        
-        # dmin = np.min([abs(x_mod[j])/np.linalg.norm(U[j,:], ord=2) for j in range(np.shape(U)[0])])
      
         for i in range(2, len(self.linearReluStack)-1, 2):
             x = nn.ReLU()(x)
