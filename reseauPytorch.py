@@ -81,10 +81,11 @@ class LinearRegressionModel(nn.Module):
     def distance(self, x) :
         d = np.inf
         produitMaxi = 1
-        
-        for i in range(0, len(self.linearReluStack)-1, 2):
+        order = 2
+        for i in range(0, len(self.linearReluStack)-1, 2):  
             if not i :
                 x = nn.ReLU()(x)
+                order = 1
             layer = self.linearReluStack[i]
             x = layer(x)
             x_mod = x.detach().numpy()
@@ -92,7 +93,7 @@ class LinearRegressionModel(nn.Module):
             minimum = np.inf
             maximum = 0
             for j in range(np.shape(W)[0]) :
-                normeLigne = np.linalg.norm(W[j,:],ord = 1)
+                normeLigne = np.linalg.norm(W[j,:],ord = order)
                 if np.abs(x_mod[j])/normeLigne < minimum : 
                     minimum = np.abs(x_mod[j])/normeLigne
                 if normeLigne > maximum :
@@ -104,12 +105,15 @@ class LinearRegressionModel(nn.Module):
         return d
     
     def distanceBis(self, x) :
+        dmin = np.inf
         layer = self.linearReluStack[0]
         x = layer(x)
         x_mod = x.detach().numpy()
-        W = layer.weight.data.numpy()
-        U = W
-        dmin = np.min([abs(x_mod[j])/np.linalg.norm(U[j,:]) for j in range(np.shape(U)[0])])
+        U = layer.weight.data.numpy()
+        for j in range(np.shape(U)[0]) :
+            dmin = min(dmin, abs(x_mod[j])/np.linalg.norm(U[j,:], ord=2))
+        
+        # dmin = np.min([abs(x_mod[j])/np.linalg.norm(U[j,:], ord=2) for j in range(np.shape(U)[0])])
      
         for i in range(2, len(self.linearReluStack)-1, 2):
             x = nn.ReLU()(x)
@@ -121,7 +125,7 @@ class LinearRegressionModel(nn.Module):
             U = np.dot(W,np.dot(A,U))
             #print(np.linalg.norm(U[j,:]), x_mod[j])
             for j in range(np.shape(U)[0]) :
-                if np.linalg.norm(U[j,:]) != 0 :
+                if np.linalg.norm(U[j,:], ord=2) != 0 :
                     dmin = min(dmin, abs(x_mod[j])/np.linalg.norm(U[j,:]))
         return dmin
             
