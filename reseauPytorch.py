@@ -21,23 +21,23 @@ class LinearRegressionModel(nn.Module):
       return logits
 
 
-# #retourne l'activation d'une seule couche du réseau
-#     def decrireFacette(self, x, layer_index):
-#       current_input = x
-#       for i, layer in enumerate(self.linearReluStack):
-#         current_input = layer(current_input)
-#         if i == layer_index:
-#           activation_binaires = (current_input > 0).int().detach().numpy()
-#           return activation_binaires
-#       return None
+#retourne l'activation d'une seule couche du réseau
+    def decrireFacette(self, x, layer_index):
+      current_input = x
+      for i, layer in enumerate(self.linearReluStack):
+        current_input = layer(current_input)
+        if i == layer_index:
+          activation_binaires = (current_input > 0).int().detach().numpy()
+          return activation_binaires
+      return None
 
-# #retourne une liste de vecteurs des activations de toutes les couches
-#     def activations0(self, x):
-#       activation = []  #[x.detach().numpy()]
-#       for layer_index in range(0, len(self.linearReluStack), 2) :
-#         activation_couche = self.decrireFacette(x, layer_index)
-#         activation.append(activation_couche)
-#       return activation
+#retourne une liste de vecteurs des activations de toutes les couches
+    def activations0(self, x):
+      activation = []  #[x.detach().numpy()]
+      for layer_index in range(0, len(self.linearReluStack)-1, 2) :
+        activation_couche = self.decrireFacette(x, layer_index)
+        activation.append(activation_couche)
+      return activation
   
     #fonction sans utiliser decrireFacette
     def activations(self, x):
@@ -50,6 +50,8 @@ class LinearRegressionModel(nn.Module):
         return activation 
     
     def act_to_binaire(self, activation):
+        '''entree : un etat d'activation
+        sortie : un entier representant cet etat en binaire'''
         res=0
         mult=0
         for couche in activation:
@@ -60,13 +62,19 @@ class LinearRegressionModel(nn.Module):
         return res
     
     def activations_bin(self,x):
+        ''' entree : un point de donnee
+        sortie : son etat d'activation en nombre'''
         return self.act_to_binaire(self.activations(x))
+    
+    def activations_bin0(self,x):
+        return self.act_to_binaire(self.activations0(x))
 
-    def reseauLin(self, etatActivation) :
+    def reseauLin(self, etatAct) :
         ''' prend en entree une liste de vecteurs qui decrit l'etat d'activation du reseau
         retourne une matrice W et un vecteur B tels que : sortie = W*entree + B 
         '''
         #Pour ne pas avoir de probleme de depassement d'indice 
+        etatActivation = np.copy(etatAct)
         etatActivation.append(np.array([1]*self.tailleOut))
         W = np.eye(self.tailleIn)
         B = np.array([0]*self.tailleIn)
