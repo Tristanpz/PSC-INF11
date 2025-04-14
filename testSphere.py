@@ -1,21 +1,16 @@
 import torch
 import numpy as np
-import reseauPytorch
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import collections as col
 import operator
-from sklearn.decomposition import PCA
-import matplotlib.colors as mcolors
 
 
-file = "model_sphere.pth"
-model = torch.load(file,weights_only=False)
+model = torch.load("model_sphere.pth", weights_only= False)
 model.eval()
 
 
 N=10000
-
-##liste_entrees= [torch.tensor(np.random.uniform(-10,10,3),dtype=torch.float32) for _ in range(N)]
 
 x=np.linspace(-10,10,int(np.cbrt(N)))
 y=np.linspace(-10,10,int(np.cbrt(N)))
@@ -26,7 +21,7 @@ X, Y,Z =np.meshgrid(x,y,z, indexing='ij')
 points=np.column_stack((X.ravel(),Y.ravel(),Z.ravel()))
 
 liste_entrees=torch.tensor(points, dtype=torch.float32)
-
+#%%
 ##Calcul des distances pour chaque point
 liste_distances=[model.distance(x) for x in liste_entrees]
 
@@ -39,27 +34,23 @@ dic_facettes=col.Counter(liste_act)
 ##liste contenant des coupes (etat d'activation, nombre de points dans la facette) triés par nombre de pts décroissant
 sorted_facettes=sorted(dic_facettes.items(), key=operator.itemgetter(1), reverse=True)
 
-
-## Etude du réseau
-
+#%%
 def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Architecture :",model.archi)
-    print("Nombre de couches :",len(model.archi))
+    print("Nombre de couches internes:",len(model.archi)-2)
 
 def strCaracReseau():
-    return "Architecture :" + str(model.archi) + " " + file[-6:-4]
+    return "Architecture :" + str(model.archi)
+# carac_reseau()
 
-def enumeration_facettes(): 
+def enumeration_facettes(): #Renvoie le nombre de facettes, et le nombre de points par facettes
     x=range(len(dic_facettes.keys()))
-    print(len(dic_facettes.keys()))
-    h=[dic_facettes[act]for act in dic_facettes.keys()]
+    h=sorted([dic_facettes[act]for act in dic_facettes.keys()],reverse=True)
     plt.bar(x,h)
-##problème pour l'affichage des labels
-    plt.title("Répartition des points sur les facettes")
+    plt.suptitle("Répartition des points sur les facettes pour N = "+str(N))
+    plt.title(strCaracReseau())
     plt.show()
-    return len(dic_facettes.keys()),dic_facettes
-
-##enumeration_facettes()
+    return dic_facettes, len(dic_facettes.keys())
 
 def facette_max(): ##renvoie la facette la plus grande et son nombre de points
     nbpoints=[dic_facettes[act] for act in dic_facettes]
@@ -74,10 +65,7 @@ def facette_max(): ##renvoie la facette la plus grande et son nombre de points
 def facettes_max(n):
     return sorted_facettes[:n]
 
-
-
-
-def poids_facettes():
+def poids_facettes(): #Retourne un histogramme du nombre de facettes en fonction du nombre de points dedans
     dico={}
     maximum=0
     for act in dic_facettes :
@@ -95,11 +83,13 @@ def poids_facettes():
             liste_poids[i]=dico[i]
     x=range(maximum+1)
     plt.bar(x,liste_poids)
+    plt.suptitle("Histogramme représentant le nombre de facettes selon leur taille")
+    plt.title(strCaracReseau())
+    plt.xlabel("Nombre de points dans la facette")
+    plt.ylabel("Nombre de facettes")
     plt.show()
 
 ##poids_facettes()
-
-
 
 def partition_facettes():##Renvoie un dico (clés=état d'activation (en binaire), valeur=liste des indices des entrées dans la facette)
     partition={}
@@ -115,17 +105,17 @@ def mesures_facettes():##Renvoie un dico (clés=état d'activation (en binaire),
     for act in partition.keys():
         mesures[act]=np.array([liste_distances[j] for j in partition[act]])
     return mesures
-
-def moyenne(): #Renvoie des données sur les distances
+    
+def moyenne_graphe(): #Renvoie des données sur les distances
     mesures=mesures_facettes()
-##    for act in mesures.keys():
-##        print(act,"moyenne: ",np.mean(mesures[act]),"max: ",np.max(mesures[act]),"nombres de points: ",len(mesures[act]),"écart-type: ",np.std(mesures[act]))
     x=range(len(dic_facettes.keys()))
     h=[mesures[act][0]for act in mesures.keys()]
-    plt.bar(x,sorted(h, reverse = True))
+    plt.bar(x,sorted(h, reverse = True), color = 'b')
+    plt.suptitle("Distance aux frontières moyenne pour chaque facette")
+    plt.title(strCaracReseau())
+    plt.xlabel("facette")
+    plt.ylabel("distance moyenne")
     plt.show()
-    
-#moyenne()
 
 def maxdist(act):
     mesures=mesures_facettes()
@@ -142,9 +132,16 @@ def stddist(act):
 def distribution_distance(act):
     mesures=mesures_facettes()
     distance_entrees_facette=mesures[act]
+    mean = meandist(act)
+    sigma = stddist(act)
     plt.hist(distance_entrees_facette,bins="auto")
-    plt.axvline(meandist(act),color="red", label="Distance moyenne")
-    plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act))
+    plt.axvline(mean,color="red", label="Distance moyenne")
+    plt.axvline(mean+sigma, color ="green", label = "écart-type")
+    plt.axvline(mean-sigma, color = "green")
+    plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act)+" nombre de points: "+str(dic_facettes[act]))
+    
+    plt.xlabel("Distance à la frontière")
+    plt.ylabel("Nombre de points")
     plt.title(strCaracReseau())
     plt.legend()
     plt.show()
@@ -153,12 +150,22 @@ def distribution_facettes(n):
     f_max=facettes_max(n)
     for i in range(n):
         distribution_distance(f_max[i][0])
+    
+list_colors=[]
+dico_colors=mcolors.CSS4_COLORS
+for key in dico_colors:
+    list_colors.append(dico_colors[key])
 
-
+def visualisation_facettes():#se base sur les entrées calculées au début (N points)
+    list_act_colors=[list_colors[i%148] for i in liste_act]
+    fig = plt.figure()
+    ax = fig.add_subplot(projection = '3d')
+    ax.scatter(liste_entrees[:,0],liste_entrees[:,1],liste_entrees[:,2],c=list_act_colors,linewidth=0.1)
+    plt.suptitle("Visualisation des facettes sur l'espace d'entrée")
+    plt.title("Architecture : " + str(model.archi))
+    plt.show()    
 
 ##test du reseau
-
-##N_test=60
 
 def genDonneesSpheriques():
     r = 10
@@ -180,22 +187,23 @@ def predire(predictions):
             resultat.append("En dehors de la sphère")
     return resultat
 
-##X_test = np.zeros((N_test, 3))
-##y_test = np.zeros((N_test, 2))
-
-
-##for i in range(N_test):
-##    res, donnee = genDonneesSpheriques()
-##    X_test[i] = donnee
-##    y_test[i] = res
-
-##X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-##predictions = model(X_test_tensor).detach().numpy()
+def test(N_test) :
+    X_test = np.zeros((N_test, 3))
+    y_test = np.zeros((N_test, 2))
     
-#sortie = predire(predictions)
-
-##for i in range(len(predictions)):
-##    print(f"Valeur réelle: {y_test[i]}, Prédiction: {predictions[i]}, Résultat: {sortie[i]}")
+    
+    for i in range(N_test):
+        res, donnee = genDonneesSpheriques()
+        X_test[i] = donnee
+        y_test[i] = res
+    
+    X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
+    predictions = model(X_test_tensor).detach().numpy()
+        
+    sortie = predire(predictions)
+    
+    for i in range(len(predictions)):
+        print(f"Valeur réelle: {y_test[i]}, Prédiction: {predictions[i]}, Résultat: {sortie[i]}")
 
 def accuracy(predictions, y_test):
     correct = 0
@@ -207,33 +215,3 @@ def accuracy(predictions, y_test):
     return correct / len(predictions) * 100  
 
 #print ("Accuracy: ",accuracy(predictions, y_test), "%")
-
-
-
-
-#5 facettes les plus peuplées
-facettes = facettes_max(5)  
-
-for act, _ in facettes:  
-    distribution_distance(act)
-
-num_colors = len(dic_facettes.keys())
-list_colors = []
-dico_colors = list(mcolors.XKCD_COLORS.values())  
-list_colors = dico_colors[:num_colors]
-
-def visualisation_facettes():
-    pca = PCA(n_components=2)
-    points = pca.fit_transform(liste_entrees.numpy())  
-    list_act_colors = [list_colors[i % num_colors] for i in liste_act]
-    plt.figure(figsize=(8, 6))
-    plt.scatter(points[:, 0], points[:, 1], 
-                c=list_act_colors, linewidth=0.2)
-    plt.suptitle("Visualisation des facettes après PCA")
-    plt.title(strCaracReseau())
-    plt.xlabel("Composante 1")    
-    plt.ylabel("Composante 2")
-    plt.show()
-
-
-visualisation_facettes()

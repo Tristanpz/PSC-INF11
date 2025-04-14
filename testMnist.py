@@ -7,7 +7,6 @@ Created on Wed Mar 19 14:18:33 2025
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import collections as col
 import torch
 import operator
@@ -15,8 +14,8 @@ import operator
 from entrainementMnist import X_test,y_test
 
 ##Lignes pour que ça marche chez Augustin
-import os
-os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
+# import os
+# os.chdir(r"C:\Users\Utilisateur\Documents\Augustin\X\2024.09 2A\Cours\PSC\Pytorch")
 
 file="model_mnist784101010e0.pth"
 model = torch.load(file, weights_only = False)
@@ -45,14 +44,14 @@ def carac_reseau(): #Imprime l'architecture du réseau actuel
     print("Nombre de couches internes:",len(model.archi)-2)
 
 def strCaracReseau():
-    return "Architecture :" + str(model.archi) + " " + file[-6:-4]
+    return "Architecture :" + str(model.archi)
     
 def enumeration_facettes(): #Renvoie le nombre de facettes
     x=range(len(dic_facettes.keys()))
     h=sorted([dic_facettes[act]for act in dic_facettes.keys()],reverse=True)
     plt.bar(x,h)
     plt.suptitle("Répartition des points sur les facettes")
-    plt.title(strCaracReseau())
+    plt.title(file)
     plt.show()
     return len(dic_facettes.keys())
 
@@ -95,8 +94,7 @@ def poids_facettes(): #Retourne un histogramme du nombre de facettes en fonction
             liste_poids[i]=dico[i]
     x=range(maximum+1)
     plt.bar(x,liste_poids)
-    plt.suptitle("Histogramme représentant le nombre de facettes selon leur taille (nombre de points de l'espace d'entrée)")
-    plt.title(strCaracReseau())
+    plt.title("Histogramme représentant le nombre de facettes selon leur taille (nombre de points de l'espace d'entrée)")
     plt.xlabel("Nombre de points dans la facette")
     plt.ylabel("Nombre de facettes")
     plt.show()
@@ -135,12 +133,17 @@ def stddist(act):
 def distribution_distance(act):
     mesures=mesures_facettes()
     distance_entrees_facette=mesures[act]
+    mean = meandist(act)
+    sigma = stddist(act)
     plt.hist(distance_entrees_facette,bins="auto")
-    plt.axvline(meandist(act),color="red", label="Distance moyenne")
+    plt.axvline(mean,color="red", label="Distance moyenne")
+    plt.axvline(mean+sigma, color ="green", label = "écart-type")
+    plt.axvline(mean-sigma, color = "green")
     plt.suptitle("Distribution des distances à la frontière pour la facette "+str(act)+" nombre de points: "+str(dic_facettes[act]))
-    plt.title(strCaracReseau())
+    
     plt.xlabel("Distance à la frontière")
     plt.ylabel("Nombre de points")
+    plt.title(strCaracReseau())
     plt.legend()
     plt.show()
 
@@ -174,5 +177,15 @@ def test():
     for i in range(len(predictions)) :
         print(predire(predictions[i]), y_test[i])
 
-
-
+def comparaisonSousApproxEtDistance() :
+    N = len(liste_entrees)
+    L = np.zeros(N)
+    for i,point in enumerate(liste_entrees):
+        sous_approximation = model.sousDistance(point)
+        distance_empirique = model.distance(point)
+        L[i] = distance_empirique / sous_approximation
+        # print(L[i],sous_approximation, distance_empirique)
+    print(np.mean(L))
+    print(np.std(L))
+    
+comparaisonSousApproxEtDistance()
