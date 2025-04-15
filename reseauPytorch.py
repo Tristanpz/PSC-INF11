@@ -5,6 +5,14 @@ import matplotlib.pyplot as plt
 
 class LinearRegressionModel(nn.Module):
     def __init__(self, archi):
+        ''' entrée : une liste qui indique le nombre de neurones 
+        dans chaque couche.
+        L'utilisateur doit vérifier que la taille d'entrée 
+        et de sortie sont cohérentes avec les données.
+        self.linearReluStack contient une liste de fonctions 
+        qui représentent les couches de notre reseau.
+        self.archi est l'achitecture du reseau, c'est-à-dire une liste
+        contenant le nombre de neurones dans chaque couche.'''        
         self.tailleIn = archi[0]
         self.tailleOut = archi[-1]
         self.archi = archi 
@@ -17,30 +25,39 @@ class LinearRegressionModel(nn.Module):
                                            
 
     def forward(self, x):
-      logits = self.linearReluStack(x)
-      return logits
+      '''propagation avant, pour une entrée x'''  
+      return self.linearReluStack(x)
 
 
 #retourne l'activation d'une seule couche du réseau
     def decrireFacette(self, x, layer_index):
-      current_input = x
-      for i, layer in enumerate(self.linearReluStack):
-        current_input = layer(current_input)
-        if i == layer_index:
-          activation_binaires = (current_input > 0).int().detach().numpy()
-          return activation_binaires
-      return None
+        ''' entrée : un point d'entrée
+            sortie : une liste contenant les états d'activation 
+        de toutes les couches '''      
+        current_input = x
+        for i, layer in enumerate(self.linearReluStack):
+            current_input = layer(current_input)
+            if i == layer_index:
+                activation_binaires = (current_input > 0).int().detach().numpy()
+                return activation_binaires
+        return None
 
 #retourne une liste de vecteurs des activations de toutes les couches
-    def activations0(self, x):
-      activation = []  #[x.detach().numpy()]
-      for layer_index in range(0, len(self.linearReluStack)-1, 2) :
-        activation_couche = self.decrireFacette(x, layer_index)
-        activation.append(activation_couche)
-      return activation
+    def activations0(self, x): #on ne l'utilise plus
+        ''' entrée : un point d'entrée
+            sortie : une liste contenant les états d'activation 
+        de toutes les couches '''
+        activation = [] 
+        for layer_index in range(0, len(self.linearReluStack)-1, 2) :
+            activation_couche = self.decrireFacette(x, layer_index)
+            activation.append(activation_couche)
+        return activation
   
     #fonction sans utiliser decrireFacette
     def activations(self, x):
+        ''' entrée : un point d'entrée
+            sortie : une liste contenant les états d'activation 
+            de toutes les couches '''
         activation = []
         for i in range(0, len(self.linearReluStack)-1, 2):
             x = self.linearReluStack[i](x)
@@ -50,8 +67,8 @@ class LinearRegressionModel(nn.Module):
         return activation 
     
     def act_to_binaire(self, activation):
-        '''entree : un etat d'activation
-        sortie : un entier representant cet etat en binaire'''
+        ''' entrée : un état d'activation
+            sortie : un entier représentant cet état en binaire'''
         res=0
         mult=0
         for couche in activation:
@@ -62,19 +79,21 @@ class LinearRegressionModel(nn.Module):
         return res
     
     def activations_bin(self,x):
-        ''' entree : un point de donnee
-        sortie : son etat d'activation en nombre'''
+        ''' entrée : un point de donnée
+            sortie : son état d'activation en nombre'''
         return self.act_to_binaire(self.activations(x))
     
-    def activations_bin0(self,x):
+    def activations_bin0(self,x): #Non utilisée en pratique
+        ''' entrée : un point de donnée
+            sortie : son état d'activation en nombre'''
         return self.act_to_binaire(self.activations0(x))
 
     def reseauLin(self, etatAct) :
-        ''' prend en entree une liste de vecteurs qui decrit l'etat d'activation du reseau
-        retourne une matrice W et un vecteur B tels que : sortie = W*entree + B 
+        ''' entrée : liste de vecteurs qui décrit l'état d'activation du reseau
+            sortie : matrice W et un vecteur B tels que : sortie = W*entree + B 
         '''
-        #Pour ne pas avoir de probleme de depassement d'indice 
         etatActivation = np.copy(etatAct)
+        #Pour ne pas avoir de probleme de depassement d'indice
         etatActivation.append(np.array([1]*self.tailleOut))
         W = np.eye(self.tailleIn)
         B = np.array([0]*self.tailleIn)
@@ -87,6 +106,9 @@ class LinearRegressionModel(nn.Module):
         return W, B
     
     def sousDistance(self, x) :
+        ''' entrée : un point d'entrée pour le reseau 
+            sortie : un scalaire donnant une sous-approximation de la   
+            distance à la frontiere la plus proche de ce point '''
         d = np.inf
         produitMaxi = 1
         order = 2
@@ -113,6 +135,9 @@ class LinearRegressionModel(nn.Module):
         return d
     
     def distance(self, x) :
+        ''' entrée : un point d'entrée pour le réseau 
+            sortie : un scalaire donnant la distance à 
+            la frontiere la plus proche de ce point '''
         dmin = np.inf
         layer = self.linearReluStack[0]
         x = layer(x)
@@ -136,10 +161,17 @@ class LinearRegressionModel(nn.Module):
         return dmin
             
         
-def creerReseau(archi) :   
+def creerReseau(archi) : 
+    ''' entree : une liste represetant l'architecture du reseau a construire
+        sortie : un reseau (non entraine) '''
     return LinearRegressionModel(archi)
 
 def entrainerReseau(model, X_tensor, y_tensor, num_epochs= 100, nbBatch = 1) :
+    ''' entree : un reseau, des donnees d'entrainement, leurs labels,
+        le nombre d'epochs et le nombre de batchs
+        sortie : None
+        Entraine le reseau avec les donnees fournies, 
+        plot de plus un graphe representant l'erreur au cours du temps'''
     criterion = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=0.01)
     nbDonnees = len(X_tensor)
