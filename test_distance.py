@@ -1,15 +1,11 @@
 import torch
 import numpy as np
-import reseauPytorch
-import matplotlib.pyplot as plt
-import collections as col
 
-
-model = torch.load("model_sphere.pth")
+model = torch.load("model_sphere.pth", weights_only=False)
 model.eval()
 
 
-N=10000
+N=1000
 
 x=np.linspace(-10,10,int(np.cbrt(N)))
 y=np.linspace(-10,10,int(np.cbrt(N)))
@@ -57,13 +53,17 @@ def test_distance(point, nombre_test, epsilon):
 #fonction qui prend un pt et des directions au hasard et qui verifie si on est
 #sorti de la facette, sinon on agrandit epsilon puis dichotomie
 def sortie_facette(point, nbr_directions, epsilon):
-
+    ''' entrée : point d'entrée, un nombre de direction (int)
+    et epsilon (float) la précision de notre évaluation
+        sortie : un float estiment empiriquement la distance 
+        du point aux frontières des facettes '''
     activation = model.activations_bin(point) 
     facteur = 1.0
     dernier_dedans = 0.0
     premier_dehors = float('inf')
     b = True
     
+    #on augmente exponentiellement la longueur du rayon 
     while b:
         direction = 2 * torch.rand(nbr_directions, 3) - 1
         for i in range(nbr_directions) :
@@ -79,7 +79,8 @@ def sortie_facette(point, nbr_directions, epsilon):
                 b = False
             
         facteur = facteur * 2
-
+        #On fait une dichotomie pour avoir une estimation précise
+        #de la distance empirique
     while abs(premier_dehors - dernier_dedans) > epsilon:
         milieu = (premier_dehors + dernier_dedans) / 2
         direction = 2 * torch.rand(nbr_directions, 3) - 1
@@ -99,27 +100,29 @@ def sortie_facette(point, nbr_directions, epsilon):
 
     return (premier_dehors+dernier_dedans)*epsilon / 2
         
-
-#Generation d'un point de reference
-point_ref = torch.tensor(np.random.uniform(-10, 10, (3,)), dtype=torch.float32)
-#point_ref = torch.tensor([-7.9132, -4.3461,  3.4173])
-
-#test_distance(point_ref, 4, 50*model.distance(point_ref))
-
-    
 def quality_check(N):
+    #La liste L sera composée des écart-relatifs à la distance empirique
     L = np.zeros(N)
     for i in range (N):
         point = torch.tensor(np.random.uniform(-10, 10, (3,)), dtype=torch.float32)
-        sous_approximation = model.distance(point)
+        sous_approximation = model.sousDistance(point)
+        
         distance_empirique = sortie_facette(point, 100, 0.001)
-        L[i] = distance_empirique / sous_approximation
+        L[i] = abs(distance_empirique-sous_approximation)/distance_empirique
+        print(L[i],sous_approximation, distance_empirique)
     print(np.mean(L))
     print(np.std(L))
 
 quality_check(100)
-    
 
-
-
+def verifAct(N) :
+    ''' permet de vérifier que la fonction activation produit 
+    les mêmes résultats que activation0 '''
+    for i in range (N):
+        point = torch.tensor(np.random.uniform(-10, 10, (3,)), dtype=torch.float32)
+        if model.activations_bin(point) != model.activations_bin0(point) :
+            print(i, point)
+            return
+    print("RAS")
+    return
 
