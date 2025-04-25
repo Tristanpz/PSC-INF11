@@ -6,11 +6,11 @@ import collections as col
 import operator
 
 
-model = torch.load("model_sphere.pth", weights_only= False)
+model = torch.load("model_sphere3842.pth", weights_only= False)
 model.eval()
 
 
-N=10000
+N=100
 
 x=np.linspace(-10,10,int(np.cbrt(N)))
 y=np.linspace(-10,10,int(np.cbrt(N)))
@@ -49,6 +49,8 @@ def enumeration_facettes(): #Renvoie le nombre de facettes, et le nombre de poin
     plt.bar(x,h)
     plt.suptitle("Répartition des points sur les facettes pour N = "+str(N))
     plt.title(strCaracReseau())
+    plt.xlabel("facettes")
+    plt.ylabel("Nombre de points dans la facette")
     plt.show()
     return dic_facettes, len(dic_facettes.keys())
 
@@ -187,6 +189,12 @@ def predire(predictions):
             resultat.append("En dehors de la sphère")
     return resultat
 
+def predireUnique(res) :
+    listeRes = np.array([[1,0],[0,1]])
+    listeNorme = [np.linalg.norm(listeRes[i,:]-res, ord = 1) for i in range(2)]
+    i = np.argmin(listeNorme)
+    return listeRes[i]
+
 def test(N_test) :
     X_test = np.zeros((N_test, 3))
     y_test = np.zeros((N_test, 2))
@@ -205,13 +213,14 @@ def test(N_test) :
     for i in range(len(predictions)):
         print(f"Valeur réelle: {y_test[i]}, Prédiction: {predictions[i]}, Résultat: {sortie[i]}")
 
-def accuracy(predictions, y_test):
-    correct = 0
-    for i in range(len(predictions)):
-        pred = 1 if predictions[i][0] > predictions[i][1] else 0
-        reel = 1 if y_test[i][0] > y_test[i][1] else 0
-        if pred == reel:
-            correct += 1
-    return correct / len(predictions) * 100  
+def accuracy(N) :
+    NbVrai = 0 
+    for _ in range(N) : 
+        res,donnee = genDonneesSpheriques()
+        X_tensor = torch.tensor(donnee, dtype = torch.float32)
+        prediction = predireUnique(model(X_tensor).detach().numpy())
+        if res[0] == prediction[0] and res[1] == prediction[1]:
+            NbVrai += 1
+    return NbVrai/N*100
 
 #print ("Accuracy: ",accuracy(predictions, y_test), "%")
